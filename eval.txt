@@ -1,0 +1,396 @@
+RAPPORT D'ÉVALUATION
+Travail Étudiant — Pipeline Ridge & Lasso
+
+Dataset : student-mat.csv  |  Prédiction de G3 (note finale)
+
+
+Rubrique
+Information
+Objet
+Évaluation critique du notebook ML soumis par les étudiants
+Fichier évalué
+Ridge_Lasso_Complet_Final.ipynb
+Technologie
+Python 3 · scikit-learn · pandas · matplotlib · seaborn · statsmodels
+Modèles comparés
+OLS · Régression Polynomiale (d=2) · Ridge (L2) · Lasso (L1)
+Évaluateur
+Enseignant responsable — Cours Machine Learning
+
+
+Structure & Code
+16/20
+Théorie & Formules
+14/20
+Incohérences détectées
+6 majeures
+Évaluation globale
+13.5/20
+
+
+1. Synthèse Générale
+Ce rapport évalue de façon rigoureuse le notebook soumis par les étudiants portant sur l'implémentation et la comparaison de modèles de régression régularisée (Ridge et Lasso) appliqués au dataset student-mat.csv. L'évaluation couvre : la qualité du code, la rigueur théorique, les incohérences détectées, les points forts, et les améliorations attendues.
+
+✅  Points Forts
+
+Pipeline sklearn propre avec anti-data leakage
+Utilisation correcte de RidgeCV et LassoCV (10-fold)
+Feature Engineering pertinent (G_avg, alc_total…)
+Analyse des résidus OLS présente et commentée
+Visualisations des chemins Ridge et Lasso (ridge path, lasso path)
+Comparaison des coefficients OLS vs Ridge vs Lasso
+Cross-validation finale avec boxplots de stabilité
+Commentaires pédagogiques détaillés dans chaque cellule
+⚠️  Lacunes Principales
+
+Confusion dans la définition du paramètre λ vs α
+Elastic Net mentionné en conclusion mais absent du code
+Tableau Section 11 avec des valeurs non calculées (*calculé*)
+Absence de test de Shapiro-Wilk formel sur les résidus
+Aucune analyse des observations à G3=0 (abandons)
+Interprétation du biais des OR Ridge non explicitée
+Absence de courbe d'apprentissage (learning curve)
+
+
+2. Incohérences et Erreurs Détectées
+5 catégories d'incohérences majeures ont été identifiées. Elles sont classées par degré de gravité.
+2.1  Incohérence #1 — Confusion de Notation λ vs α  ⚠️ MODÉRÉE
+LOCALISATION
+Sections 6.1 (cellule 41), 6.3 (cellule 46), Section 8.2 (cellule 61)
+
+
+Tout au long du notebook, les formules mathématiques utilisent tantôt λ, tantôt α pour désigner le paramètre de régularisation. Cette inconsistance de notation est une source de confusion pédagogique.
+Ce qui est écrit
+Section 0 : formule Ridge avec λ
+Code : alpha=best_alpha_ridge
+Section 6.1 : 'α → 0 équivalent OLS'
+Titre tableau : α={best_alpha_ridge:.3f}
+Correction attendue
+Choisir UNE seule convention et s'y tenir.
+Convention sklearn : alpha (paramètre du constructeur)
+Convention mathématique : λ dans les formules LaTeX
+Préciser au début : 'α (sklearn) = λ (notation math)'
+
+
+2.2  Incohérence #2 — VIF calculé après suppression de G1 et G2  ⚠️ MODÉRÉE
+LOCALISATION
+Section 2.3 (cellule 26) — Analyse VIF après Feature Engineering
+
+
+Le VIF est calculé sur le DataFrame df_enc qui ne contient plus G1 ni G2 (remplacées par G_avg). L'interprétation dans la cellule 27 dit cependant : «Dans ce dataset, G_avg peut avoir un VIF élevé car il est fortement corrélé avec G3».
+Cette affirmation est incohérente : la multicolinéarité mesurée par VIF concerne les relations ENTRE prédicteurs (X), pas entre un prédicteur et la variable cible (Y). Un VIF élevé de G_avg signifie qu'il est corrélé avec d'autres Xi, et non avec G3. Cette confusion entre corrélation X-X et corrélation X-Y est une erreur conceptuelle.
+Affirmation incorrecte
+Correction
+«G_avg peut avoir un VIF élevé car corrélé avec G3»
+VIF mesure la corrélation entre prédicteurs (X-X), pas avec Y
+VIF calculé sans vérification des seuils obtenus
+Afficher et interpréter les valeurs VIF réelles obtenues
+Absence de traitement des features à VIF > 10
+Proposer une action concrète : supprimer, combiner ou Ridge
+
+
+2.3  Incohérence #3 — GridSearchCV sur X_train non standardisé  ⚠️ MODÉRÉE
+LOCALISATION
+Section 6.5 (cellule 52) — Validation complémentaire des alphas
+
+
+Dans la cellule 52, le GridSearchCV est entraîné avec gs_ridge.fit(X_train, y_train) — sans standardisation. Or, Ridge et Lasso sont des méthodes sensibles à l'échelle des variables. Le Pipeline pipe_ridge inclut bien un StandardScaler, donc le GridSearchCV avec Pipeline est correct en théorie.
+L'incohérence est la suivante : le commentaire final dit «On conserve les alphas trouvés par RidgeCV/LassoCV (entraînés sur données standardisées → résultats plus fiables)». Cela implique implicitement que les résultats du GridSearchCV sont moins fiables — ce point mérite d'être explicité et non minimisé.
+Alpha RidgeCV ≠ Alpha GridSearchCV attendu : 
+Le RidgeCV travaille sur X_train_sc (déjà standardisé) → l'alpha optimal est calculé sur données standardisées
+Le GridSearchCV utilise un Pipeline avec scaler interne → l'alpha optimal devrait être équivalent
+Si les deux alphas divergent significativement, cela signale un problème dans la configuration — à analyser explicitement
+
+2.4  Incohérence #4 — Elastic Net cité sans Implémentation  ⚠️ LÉGÈRE
+LOCALISATION
+Section 12 — Conclusion (cellule 72, dernier paragraphe)
+
+
+La conclusion recommande explicitement : «ElasticNet (combinaison L1+L2) serait un bon compromis à explorer». Cette recommandation est pertinente et bien fondée, mais elle reste purement thétorique puisque le notebook ne contient aucune implémentation d'Elastic Net.
+Dans un travail académique complet, une recommandation de ce type doit être accompagnée d'une démonstration pratique. L'absence d'implémentation affaiblit la conclusion et crée une attente non satisfaite pour le lecteur.
+
+2.5  Incohérence #5 — Choix du Degré 2 pour la Régression Polynomiale Non Justifié  ⛔ GRAVE
+LOCALISATION
+Section 5 — Régression Polynomiale (cellules 37 à 40)
+
+
+La régression polynomiale de degré 2 est introduite directement avec PolynomialFeatures(degree=2) sans aucune justification du choix de ce degré. C'est l'une des lacunes les plus importantes du notebook car elle touche à la fois à la rigueur méthodologique et à la cohérence de l'analyse.
+A — Pourquoi degree=2 et pas degree=1, 3 ou 4 ?
+Le choix de 2 est présenté comme une évidence alors qu'il devrait être justifié empiriquement. Trois approches étaient attendues :
+Scatter plots G3 vs chaque prédicteur clé avec courbe LOWESS pour détecter visuellement les non-linéarités avant de choisir le degré
+Courbe de validation (validation_curve) traçant le R² test en fonction du degré (1, 2, 3, 4…) → on choisit le degré au coude de la courbe ou à la saturation
+Test statistique de non-linéarité : comparer OLS (d=1) vs Poly (d=2) par F-test ou par AIC/BIC
+
+B — Les données ne montrent pas de non-linéarité évidente
+Dans la Section 1.6 du notebook, les corrélations sont calculées avec Spearman — une mesure robuste aux non-linéarités monotones. Les boxplots de la Section 1.7 montrent des relations essentiellement monotones entre G3 et les prédicteurs clés (G_avg, failures, studytime). Il n'existe aucune preuve graphique ou statistique d'une relation quadratique qui justifierait degree=2.
+Prédicteur
+Relation avec G3
+Justification d=2 ?
+G_avg
+Linéaire forte (ρ > 0.80)
+❌ Non — relation déjà bien linéaire
+failures
+Monotone décroissante
+❌ Non — pas de forme en U ou en cloche
+studytime
+Monotone croissante faible
+❌ Non — pas de saturation quadratique visible
+absences
+Légèrement non-linéaire (skew)
+⚠️ Possible — mais à vérifier par LOWESS
+parent_edu
+Monotone faible
+❌ Non — relation trop faible pour justifier d=2
+
+
+C — Explosion des features non suffisamment discutée
+Le notebook mentionne le ratio observations/features mais sans calculer le seuil critique de façon rigoureuse :
+n_train = 316 observations  |  n_features_poly ≈ 77 à 90 features après transformation
+Ratio effectif : 316 / 85 ≈ 3.7  →  largement en dessous du minimum recommandé de 10:1 pour une régression stable
+Avec un ratio aussi bas, OLS sur features polynomiales est mathématiquement instable — ce n'est pas seulement un 'risque d'overfitting', c'est une quasi-certitude de singularité
+Ce calcul précis manque dans le notebook : il aurait renforcé et quantifié l'argument pour la régularisation
+
+D — Rôle pédagogique de la régression polynomiale non explicité
+Dans le notebook, la régression polynomiale est clairement introduite pour démontrer l'overfitting et justifier Ridge/Lasso. C'est une approche pédagogique valide, MAIS le travail aurait dû l'énoncer clairement :
+❌  Ce qui est écrit (implicite)
+Poly est présentée comme un modèle sérieux à comparer, sans préciser que son rôle est purement démonstratif de l'overfitting.
+✅  Ce qui était attendu (explicite)
+«La régression polynomiale est introduite ici comme modèle de référence pour illustrer l'overfitting. Elle n'est pas recommandée sur ce dataset en raison du ratio n/p insuffisant (3.7 < 10).»
+
+
+E — pipe_poly_ridge créé mais jamais évalué sérieusement
+La Section 3 (cellule 31) construit pipe_poly_ridge = PolynomialFeatures(d=2) + Ridge, ce qui est conceptuellement la meilleure combinaison : les termes polynomiaux capturent les non-linéarités, Ridge contrôle l'explosion de features. Ce pipeline n'apparaît que dans la cross-validation finale (Section 9) mais est absent du tableau comparatif principal.
+pipe_poly_ridge devait être optimisé via GridSearchCV (alpha ET degree simultanément)
+Sa performance devait être comparée à Ridge simple pour quantifier le gain réel des termes polynomiaux
+Si Poly+Ridge ≈ Ridge simple → confirmation que les non-linéarités sont négligeables dans ce dataset
+Si Poly+Ridge > Ridge simple → justification a posteriori du degré 2
+
+3. Analyse Critique par Section
+Section
+Contenu
+Qualité
+Observations
+Section 0 — Intro
+Contexte, formules, hypothèses, métriques
+✅ Très bien
+Formules LaTeX correctes. Légère confusion λ/α. Tableau des hypothèses complet.
+Section 1 — EDA
+Chargement, distribution G3, corrélations, catégorielles
+✅ Excellent
+Spearman justifié pour variables ordinales. Histogramme, boxplot, QQ-plot présents. Bonne interprétation.
+Section 2 — Prétraitement
+Feature engineering, encodage, VIF, split, standardisation
+✅ Bon
+G_avg pertinent. Encodage correct (Label + OHE). VIF mal interprété (corrélation X-Y confondue avec X-X).
+Section 3 — Pipeline
+Construction des pipelines sklearn
+✅ Excellent
+Anti-data leakage bien compris et implémenté. Commentaires clairs.
+Section 4 — OLS
+Baseline, métriques, résidus
+✅ Très bien
+Analyse des résidus présente. LOWESS, QQ-plot. Interprétation correcte.
+Section 5 — Polynomiale
+Régression poly d=2, overfitting
+⚠️ Moyen
+Degré 2 non justifié (aucun scatter plot, aucune validation_curve). Ratio n/p = 3.7 non calculé explicitement. pipe_poly_ridge jamais évalué dans le tableau final.
+Section 6 — Hyperparamètres
+RidgeCV, LassoCV, chemin Ridge/Lasso, GridSearchCV
+✅ Excellent
+Chemins de régularisation bien tracés et interprétés. GridSearchCV incohérent (voir §2.4).
+Section 7 — Modèles finaux
+Entraînement Ridge et Lasso finaux
+✅ Bien
+Résultats présentés clairement. Nombre de features Lasso sélectionnées indiqué.
+Section 8 — Résultats
+Tableau comparatif, coefficients, sélection Lasso
+⚠️ Moyen
+Tableau Section 11 avec placeholders. Bonne visualisation des coefficients. Biais OR Ridge non discuté.
+Section 9 — CV finale
+Cross-validation 10-fold avec pipelines, boxplots
+✅ Excellent
+Approche rigoureuse. Boxplots de stabilité bien interprétés.
+Section 10 — Récap
+Tableau récapitulatif théorique
+✅ Bien
+Synthèse claire. Métriques sans valeurs réelles (valeurs calculées à l'exécution).
+Section 11 — Conclusion
+Recommandation Ridge vs Lasso
+✅ Très bien
+Argumentation structurée et convaincante. Elastic Net recommandé mais non implémenté.
+
+
+4. Améliorations Attendues pour Compléter le Travail
+Les améliorations listées ci-dessous sont classées en trois priorités : essentielles (manquantes pour un travail complet), recommandées (amélioreraient significativement la qualité) et optionnelles (apporteraient une plus-value supplémentaire).
+4.1  Améliorations Essentielles (Manques Critiques)
+A — Implémentation d'Elastic Net
+La mention en conclusion sans implémentation est insuffisante. Le travail doit inclure :
+ElasticNetCV avec cross-validation pour optimiser α et l1_ratio simultanément
+Chemin de régularisation Elastic Net (coefficients en fonction de α)
+Intégration dans le tableau comparatif final avec les 4 autres modèles
+Interprétation : quand Elastic Net est-il préférable à Ridge ou Lasso seul ?
+
+B — Correction du Tableau Section 11 (métriques de régression complètes)
+Le tableau doit être entièrement remplacé ou complété avec les valeurs numériques réelles produites à l'exécution :
+Métrique
+OLS
+Poly (d=2)
+Ridge
+Lasso
+Elastic Net
+MSE Test
+À calculer
+À calculer
+À calculer
+À calculer
+À ajouter
+RMSE Test
+À calculer
+À calculer
+À calculer
+À calculer
+À ajouter
+MAE Test
+À calculer
+À calculer
+À calculer
+À calculer
+À ajouter
+R² Ajusté
+À calculer
+À calculer
+À calculer
+À calculer
+À ajouter
+Gap R²
+À calculer
+À calculer
+À calculer
+À calculer
+À ajouter
+Features actives
+Toutes
+Poly+toutes
+Toutes
+Sélection
+Sélection
+R² std (CV10)
+À calculer
+À calculer
+À calculer
+À calculer
+À ajouter
+
+
+C — Analyse formelle des observations G3 = 0
+Les étudiants ayant G3=0 sont mentionnés comme abandons mais ne sont pas traités. Deux approches attendues :
+Comparer les performances des modèles avec et sans les G3=0 pour quantifier leur impact
+Ou les encoder comme une variable indicatrice (abandon = 1) et tester si leur inclusion améliore la prédiction
+
+D — Tests statistiques formels des résidus
+L'analyse des résidus utilise le test D'Agostino-Pearson (stats.normaltest). Le travail gagnerait en rigueur avec :
+Test de Shapiro-Wilk (plus adapté aux petits échantillons, n=316 train)
+Test de Breusch-Pagan d'homoscédasticité (déjà importé dans les imports mais jamais utilisé !)
+Test de Durbin-Watson pour l'indépendance des résidus (important en prédiction scolaire)
+
+4.2  Améliorations Recommandées
+E — Courbes d'apprentissage (Learning Curves)
+Les courbes d'apprentissage (train score vs validation score en fonction de n) permettent de diagnostiquer précisément si le problème est un underfitting ou un overfitting, et d'évaluer si davantage de données aiderait le modèle.
+Tracer les learning curves pour OLS, Ridge et Lasso
+Identifier le point de convergence entre train et validation
+Conclure sur la suffisance de n=395 observations
+
+F — Intervalles de Confiance des Prédictions
+Les prédictions ponctuelles (valeurs uniques) sont insuffisantes pour un usage décisionnel. Le travail devrait inclure :
+Intervalles de confiance des coefficients Ridge (disponibles via statsmodels)
+Intervalles de prédiction pour de nouveaux étudiants (±RMSE au minimum)
+Bootstrap des prédictions pour estimer l'incertitude
+
+G — Analyse des Variables Sélectionnées par Lasso (Interprétation Approfondie)
+La liste des features retenues est affichée mais l'interprétation reste superficielle. Attendu :
+Pour chaque feature retenue : expliquer pourquoi elle est prédictive de G3 (lien avec la littérature éducative)
+Comparer la sélection Lasso avec les top corrélations Spearman de la Section 1.6
+Identifier les variables que Lasso élimine malgré une corrélation Spearman non nulle avec G3 et expliquer pourquoi
+
+H — Validation Externe ou Comparaison avec Student-Por.csv
+Le dataset student-por.csv (élèves de portugais, même école) permet de valider la généralisation du modèle :
+Entraîner Ridge/Lasso sur student-mat.csv, tester sur student-por.csv (transfert)
+Comparer si les features sélectionnées par Lasso sont stables entre les deux matières
+
+4.3  Améliorations Optionnelles (Plus-Value Supplémentaire)
+I — Optionnel : Discrétisation de G3 pour Métriques de Classification
+Pour répondre à l'ambition de la Section 11 (métriques de classification), les étudiants auraient pu:
+Créer une variable binaire : succès = 1 si G3 ≥ 10, échec = 0
+Ajuster une régression logistique Ridge et Lasso (LogisticRegression avec penalty='l1'/'l2')
+Calculer alors Accuracy, Précision, Rappel, F1 et AUC-ROC de façon légitime
+Comparer l'approche régression puis seuil vs classification directe
+
+J — Optionnel : Comparaison avec d'autres Régulariseurs
+Huber Regression (robuste aux outliers — utile pour les G3=0)
+Quantile Regression (prédiction des percentiles de G3)
+SVR avec noyau RBF (capture les non-linéarités sans l'explosion polynomiale)
+
+5. Grille d'Évaluation Détaillée
+Critère d'évaluation
+Pondération
+Note /20
+Commentaire
+Rigueur théorique (formules, hypothèses, notation)
+15%
+13/20
+Formules correctes mais confusion λ/α persistante. Hypothèses OLS bien listées.
+Qualité du code Python (clarté, anti-leakage, pipeline)
+20%
+17/20
+Pipeline sklearn excellent. Anti-data leakage maîtrisé. Commentaires très pédagogiques.
+Pertinence du prétraitement (FE, VIF, encodage)
+15%
+15/20
+Feature engineering pertinent. VIF mal interprété (corrélation X-Y vs X-X).
+Optimisation des hyperparamètres (RidgeCV, LassoCV, GridSearch)
+15%
+16/20
+Bonne utilisation de RidgeCV et LassoCV. GridSearchCV légèrement incohérent.
+Qualité des visualisations (chemins, comparaisons, résidus)
+10%
+17/20
+Visualisations riches et bien commentées. Ridge path et Lasso path présents.
+Interprétation et analyse des résultats
+10%
+13/20
+Interprétation des coefficients bonne. Biais OR Ridge non discuté. G3=0 ignorés.
+Complétude du travail (Elastic Net, métriques, tests)
+10%
+8/20
+Elastic Net absent. Métriques de classification inadaptées. Tableau non complété.
+Qualité de la conclusion et recommandation
+5%
+15/20
+Conclusion structurée et argumentée. ElasticNet recommandé sans démonstration.
+
+
+NOTE FINALE  :  13.5 / 20
+—  Travail sérieux avec des lacunes corrigeables
+
+
+6. Conclusion et Recommandations Finales
+Le notebook soumis témoigne d'un effort pédagogique et technique sérieux. Les étudiants maîtrisent les concepts fondamentaux de la régularisation (Ridge L2, Lasso L1), la construction de pipelines sklearn sans data leakage, et la cross-validation. La qualité du code et des visualisations est globalement élevée.
+Cependant, plusieurs points fragilisent le travail :
+L'introduction de métriques de classification dans un problème de régression révèle une confusion conceptuelle non pleinement résolue.
+L'Elastic Net est recommandé en conclusion sans être implémenté, créant une attente non satisfaite.
+Le tableau comparatif de la Section 11 reste incomplet (placeholders *calculé* non remplacés).
+L'interprétation du VIF confond corrélation X-Y et corrélation X-X.
+
+Pour une note supérieure (16-18/20), le travail devrait :
+Implémenter Elastic Net avec ElasticNetCV et l'intégrer dans toutes les comparaisons
+Corriger le tableau Section 11 avec les valeurs numériques réelles et les métriques de régression uniquement
+Ajouter le test de Breusch-Pagan sur les résidus (l'import est déjà présent !)
+Analyser explicitement l'impact des observations G3 = 0 sur les performances
+Tracer des learning curves pour diagnostiquer le régime bias/variance
+Clarifier et uniformiser la notation λ / α dans toutes les formules
+
+🎓  Message aux étudiants
+Le socle de ce travail est solide. Vous comprenez et implémentez correctement Ridge et Lasso dans un pipeline reproductible. Les corrections demandées portent essentiellement sur la complétude (Elastic Net, tests formels) et la cohérence conceptuelle (métriques, VIF). En apportant ces améliorations, ce notebook deviendrait un excellent document de référence pour la sélection de variables par régularisation.
+
+
+

@@ -1,6 +1,6 @@
-# Preparation Questions Orales (N1 a N4)
+# Preparation Questions Orales (N1 a N4) - Version Renforcee
 
-Objectif: repondre vite, juste et clairement aux questions de soutenance, en lien direct avec le notebook.
+Objectif: repondre vite, juste et sans incoherence, en restant strictement aligne avec [main.ipynb](main.ipynb).
 
 ## N1 - Bases (definitions, principes, hyperparametres)
 
@@ -9,54 +9,51 @@ Question type:
 
 Reponse courte conseillee:
 - Gradient Boosting combine des arbres faibles sequentiellement pour corriger les erreurs precedentes.
-- Naive Bayes applique le theoreme de Bayes avec hypothese d'independance conditionnelle des variables.
-- Regression Logistique est un modele lineaire probabiliste qui estime P(y=1|x) via une sigmoide.
+- Naive Bayes applique le theoreme de Bayes avec hypothese d'independance conditionnelle.
+- Regression Logistique estime une probabilite via la sigmoide.
 
-Hyperparametres a citer:
-- Gradient Boosting: n_estimators, learning_rate, max_depth, subsample.
+Hyperparametres a citer (ceux du notebook):
+- Gradient Boosting: n_estimators, learning_rate, max_depth, min_samples_leaf, subsample.
 - Naive Bayes: var_smoothing.
 - Regression Logistique: C, penalty, solver, max_iter.
 
-## N2 - Differences, comparaison, cas d'usage
+## N2 - Comparaison et cas d'usage
 
 Question type:
-- "Pourquoi ces trois modeles et dans quels cas choisir chacun?"
+- "Pourquoi ces trois modeles et dans quels cas choisir chacun ?"
 
 Reponse courte conseillee:
-- Naive Bayes: tres rapide, bon baseline probabiliste, mais hypothese d'independance parfois trop forte.
-- Regression Logistique: interpretable, stable, bonne reference lineaire.
-- Gradient Boosting: capte les non-linearites et interactions, mais plus sensible au surapprentissage si mal regle.
+- Naive Bayes: rapide, simple, bon Recall ici.
+- Regression Logistique: meilleur ROC-AUC et forte interpretabilite.
+- Gradient Boosting: capte des non-linearites mais plus sensible au surapprentissage sur petit dataset.
 
-Phrase decisionnelle:
-- Si priorite a l'interpretabilite: Regression Logistique.
-- Si priorite au rappel dans ce notebook: Naive Bayes.
-- Si donnees plus riches et tuning possible: Gradient Boosting devient tres competitif.
+Decision pratique:
+- Priorite depistage (minimiser faux negatifs): Naive Bayes.
+- Priorite compromis global + interpretabilite: Regression Logistique.
 
-## N3 - Pratique (standardisation, CV, metriques)
+## N3 - Pratique (pipeline, metriques, seuil)
 
 Question type:
-- "Pourquoi standardiser? Pourquoi faire de la CV? Pourquoi ces metriques?"
+- "Pourquoi ce protocole experimental ?"
 
 Reponse courte conseillee:
-- Standardisation: utile pour Naive Bayes et Regression Logistique, car l'echelle influence l'apprentissage.
-- CV stratifiee 5-fold: reduit le risque de conclusion dependante d'un split chanceux.
-- Metriques choisies:
-  - Recall: critique pour ne pas rater de patients malades.
-  - Precision: controle les fausses alertes.
-  - F1: compromis precision/recall.
-  - ROC-AUC: qualite globale de discrimination independante du seuil.
+- Split stratifie + CV 5-fold pour robustesse.
+- Baseline Dummy pour verifier le gain reel.
+- Metriques complementaires (Recall, Precision, F1, Specificite, ROC-AUC) pour eviter une conclusion basee uniquement sur Accuracy.
+- Calibration et optimisation du seuil pour rendre les probabilites actionnables cliniquement.
 
-## N4 - Critique (diagnostic, limites, ameliorations)
+## N4 - Critique (preuves, limites, perspectives)
 
 Question type:
-- "Comment prouves-tu ton esprit critique sur les resultats?"
+- "Comment montres-tu ton esprit critique ?"
 
 Reponse courte conseillee:
-- J'ai ajoute une baseline Dummy pour mesurer le gain reel des modeles.
-- J'ai diagnostiqe le surapprentissage via l'ecart CV train/test en ROC-AUC.
-- Dans mes resultats, Gradient Boosting montre un gap plus eleve, donc risque de surapprentissage.
-- J'ai explicite les limites: taille de dataset, absence de validation externe, tuning partiel.
-- J'ai propose des ameliorations: tuning systematique, calibration des probabilites, analyse de seuils, comparaison avec SVM/RF/XGBoost.
+- Surapprentissage analyse avec deux preuves:
+  - CV_gap_ROC_AUC
+  - learning curves train vs validation.
+- Fiabilite probabiliste verifiee avec calibration curve + Brier score.
+- Seuil clinique optimise via courbe Precision-Recall.
+- Limites explicites: taille modeste, absence de validation externe.
 
 ## Chiffres cles a memoriser
 
@@ -64,7 +61,15 @@ Reponse courte conseillee:
 - Regression Logistique: ROC-AUC = 0.950
 - Naive Bayes: ROC-AUC = 0.938, Recall = 0.857
 - Gradient Boosting: ROC-AUC = 0.905
+- CV gap (ROC-AUC): GB = 0.138, LogReg = 0.047, NB = 0.031
+
+## Pieges a eviter (inspire eval.txt)
+
+1. Citer une methode non implantee (interdit).
+2. Annoncer un resultat sans chiffre/verif dans une sortie notebook.
+3. Confondre qualite de classement (ROC-AUC) et choix de seuil (decision clinique).
+4. Oublier de justifier pourquoi on privilegie Recall ou Precision.
 
 ## Mini script de 30 secondes (si jury presse)
 
-"J'ai compare trois familles de modeles sur UCI Heart Disease avec un protocole robuste: split stratifie, CV 5-fold, baseline Dummy et evaluation multi-metriques. Les meilleurs resultats globaux en ROC-AUC viennent de la Regression Logistique, tandis que Naive Bayes obtient le meilleur recall, pertinent pour le depistage. Gradient Boosting est competitif mais montre plus de surapprentissage dans ce contexte. J'ai identifie les limites et propose des pistes concretes: tuning, calibration et validation externe."
+"J'ai compare Gradient Boosting, Naive Bayes et Regression Logistique avec un protocole robuste: split stratifie, baseline Dummy, CV 5-fold et test hold-out. Les meilleurs scores montrent un compromis clair: Regression Logistique a le meilleur ROC-AUC, Naive Bayes le meilleur Recall pour depistage. J'ai complete l'analyse avec calibration des probabilites, optimisation du seuil et learning curves pour diagnostiquer le surapprentissage. Les limites et perspectives sont explicites, notamment validation externe et calibration post-hoc." 

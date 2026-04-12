@@ -1,154 +1,251 @@
-# Structure de Presentation Optimisee (Max Points)
+# Structure de Presentation Optimisee (Version 28 Slides)
 
-Objectif: couvrir explicitement les criteres C1 a C6 du bareme, en 10 a 15 minutes.
+Objectif: faire une soutenance longue (28 slides environ), claire et bien notee, en restant strictement coherent avec [main.ipynb](main.ipynb) et les alertes de [eval.txt](eval.txt).
 
-## Strategie Globale
+## Regles D'Or (anti-incoherences)
 
-1. Montrer la theorie avant les resultats (C1).
-2. Prouver la qualite de code et la reproductibilite (C2).
-3. Interpreter les metriques avec baseline + diagnostic (C3).
-4. Anticiper les questions orales N1-N4 (C4).
-5. Garder des slides aeres, visuels et chronometres (C5).
-6. Finir avec limites, perspectives et liens methodologiques (C6).
+1. Ne jamais annoncer une methode absente du notebook.
+2. Ne jamais laisser de placeholders dans les tableaux de resultats.
+3. Utiliser la meme terminologie du debut a la fin.
+4. Justifier chaque choix methodologique (metriques, seuil, protocole).
+5. Associer chaque conclusion a une preuve numerique ou graphique.
+6. Signaler explicitement ce qui est non implemente ici.
 
-## Plan Recommande (12 Slides)
+## Plan Recommande (28 slides)
 
-## Slide 1 - Titre et promesse (40s)
+## Bloc A - Introduction et cadre (Slides 1 a 5)
 
+## Slide 1 - Titre du projet
 Contenu:
-- Sujet, nom, contexte.
-- Phrase de promesse: "Comparer 3 modeles pour un depistage cardiaque interpretable et robuste".
-
-Criteres couverts:
+- Sujet, auteur, contexte du cours.
+- Promesse: comparaison de 3 modeles pour le depistage cardiaque.
+Critere cible:
 - C5
 
-## Slide 2 - Contexte medical et enjeu (60s)
-
+## Slide 2 - Plan de la presentation
 Contenu:
-- Pourquoi detecter tot.
-- Cout des faux negatifs en contexte clinique.
+- Donnees.
+- Methode.
+- Resultats.
+- Analyse critique.
+- Recommandation.
+Critere cible:
+- C5
 
-Criteres couverts:
+## Slide 3 - Contexte medical
+Contenu:
+- Pourquoi le depistage est important.
+- Cout clinique d'un faux negatif.
+Critere cible:
 - C5, C6
 
-## Slide 3 - Theorie des 3 modeles (90s)
-
+## Slide 4 - Question de recherche
 Contenu:
-- Gradient Boosting: principe + hyperparametres (n_estimators, learning_rate, max_depth, subsample).
-- Naive Bayes: principe + hypothese d'independance + var_smoothing.
-- Regression Logistique: sigmoide + C, penalty, solver.
+- Quel modele offre le meilleur compromis selon l'usage clinique.
+- Priorite possible: discrimination globale vs rappel eleve.
+Critere cible:
+- C1, C6
 
-Criteres couverts:
-- C1
-
-## Slide 4 - Donnees et protocole experimental (60s)
-
+## Slide 5 - Objectifs mesurables
 Contenu:
-- UCI Cleveland, cible binaire.
-- Split stratifie train/test.
-- Validation croisee 5-fold.
-- Metriques: Accuracy, Precision, Recall, Specificite, F1, ROC-AUC.
-
-Criteres couverts:
+- Battre une baseline naive.
+- Comparer sur CV et test.
+- Produire une recommandation justifiee.
+Critere cible:
 - C1, C2
 
-## Slide 5 - Pipeline implementation (70s)
+## Bloc B - Donnees et preparation (Slides 6 a 10)
 
+## Slide 6 - Dataset
 Contenu:
-- Pipeline complet: import -> nettoyage -> split -> scale -> fit -> predict.
-- Baseline Dummy ajoutee pour comparaison juste.
-- Reproductibilite: RANDOM_STATE et code propre.
+- Source: UCI Cleveland.
+- Variables cliniques utilisees.
+- Cible binaire 0/1.
+Critere cible:
+- C1
 
-Criteres couverts:
+## Slide 7 - Qualite des donnees
+Contenu:
+- Valeurs manquantes et strategie adoptee.
+- Conversion numerique + dropna.
+Critere cible:
 - C2
 
-## Slide 6 - Resultats CV (70s)
-
+## Slide 8 - Distribution de la cible
 Contenu:
-- Tableau CV avec moyenne des metriques.
-- Colonne CV_gap_ROC_AUC (train - test) pour diagnostiquer le surapprentissage.
+- Distribution brute target et distribution binaire.
+- Taux de positifs.
+Critere cible:
+- C2
 
-Criteres couverts:
+## Slide 9 - Correlations exploratoires
+Contenu:
+- Heatmap des correlations.
+- Variables qui semblent influentes.
+Critere cible:
+- C2
+
+## Slide 10 - Split experimental
+Contenu:
+- Train/test stratifie.
+- Verification des proportions de classes.
+Critere cible:
+- C2
+
+## Bloc C - Methodes et protocole (Slides 11 a 15)
+
+## Slide 11 - Baseline et role
+Contenu:
+- Dummy most_frequent comme niveau minimal.
+- Pourquoi la baseline est indispensable pour evaluer le gain reel.
+Critere cible:
+- C2, C3
+
+## Slide 12 - Modeles compares
+Contenu:
+- Gradient Boosting.
+- Naive Bayes.
+- Regression Logistique.
+Critere cible:
+- C1
+
+## Slide 13 - Hyperparametres utilises
+Contenu:
+- Valeurs concretes prises dans le code.
+- Mention explicite: pas de tuning global implemente.
+Critere cible:
+- C1, C3
+
+## Slide 14 - Metriques d'evaluation
+Contenu:
+- Accuracy, Precision, Recall, Specificite, F1, ROC-AUC.
+- Lien metrique-usage clinique.
+Critere cible:
+- C1, C6
+
+## Slide 15 - Validation croisee
+Contenu:
+- StratifiedKFold (5 folds).
+- Lecture du CV_gap_ROC_AUC pour le surapprentissage.
+Critere cible:
+- C2, C3
+
+## Bloc D - Resultats quantitatifs (Slides 16 a 21)
+
+## Slide 16 - Resultats CV (tableau)
+Contenu:
+- Naive Bayes: CV ROC-AUC 0.870, gap 0.031.
+- Regression Logistique: CV ROC-AUC 0.869, gap 0.047.
+- Gradient Boosting: CV ROC-AUC 0.862, gap 0.138.
+Critere cible:
 - C3
 
-## Slide 7 - Resultats Test (70s)
-
+## Slide 17 - Resultats test (tableau complet)
 Contenu:
-- Tableau final test.
-- Chiffres clefs a annoncer:
-	- Regression Logistique: ROC-AUC = 0.950
-	- Naive Bayes: ROC-AUC = 0.938, Recall = 0.857
-	- Gradient Boosting: ROC-AUC = 0.905
-	- Baseline: ROC-AUC = 0.500
-
-Criteres couverts:
+- Regression Logistique: ROC-AUC 0.950, Recall 0.786, F1 0.815.
+- Naive Bayes: ROC-AUC 0.938, Recall 0.857, F1 0.873.
+- Gradient Boosting: ROC-AUC 0.905, Recall 0.786, F1 0.800.
+- Baseline Dummy: ROC-AUC 0.500.
+Critere cible:
 - C3
 
-## Slide 8 - Matrices de confusion (60s)
-
+## Slide 18 - Matrices de confusion
 Contenu:
-- Montrer les 4 matrices (3 modeles + baseline).
-- Insister sur faux negatifs vs faux positifs.
-
-Criteres couverts:
-- C3, C5
-
-## Slide 9 - Courbes ROC et interpretation (60s)
-
-Contenu:
-- Courbe ROC commune.
-- Message: tous les modeles battent clairement la baseline.
-
-Criteres couverts:
+- Comparaison des types d'erreurs entre modeles.
+- Message: tous > baseline, mais profils differents.
+Critere cible:
 - C3
 
-## Slide 10 - Analyse critique et explicabilite (90s)
-
+## Slide 19 - Courbes ROC
 Contenu:
-- Overfitting detecte sur Gradient Boosting (gap CV plus eleve).
-- Variable importance (GB) + coefficients absolus (LogReg).
-- Compromis performance vs interpretabilite.
+- ROC superposees.
+- Message principal: meilleure discrimination globale de la regression logistique.
+Critere cible:
+- C3
 
-Criteres couverts:
+## Slide 20 - Importance des variables
+Contenu:
+- Importances GB vs coefficients absolus logistiques.
+- Variables recurrentes a commenter.
+Critere cible:
 - C3, C6
 
-## Slide 11 - Limites et perspectives (80s)
-
+## Slide 21 - Rapport de classification
 Contenu:
-- Limites: taille dataset, absence de validation externe, tuning partiel.
-- Perspectives: tuning systematique, calibration, seuils cliniques, comparaison SVM/RF/XGBoost.
+- Precision/Recall/F1 par classe pour les modeles principaux.
+- Lien avec le choix clinique.
+Critere cible:
+- C3
 
-Criteres couverts:
+## Bloc E - Analyse critique avancee (Slides 22 a 26)
+
+## Slide 22 - Calibration des probabilites
+Contenu:
+- Courbes de calibration.
+- Brier score: Logistique 0.094, Naive Bayes 0.098, Gradient Boosting 0.128.
+Critere cible:
+- C3, C6
+
+## Slide 23 - Optimisation exploratoire du seuil
+Contenu:
+- Precision-Recall sur Naive Bayes.
+- Seuil 0.50 vs seuil 0.151.
+- Mention obligatoire: seuil ajuste sur test actuel, lecture exploratoire.
+Critere cible:
+- C3, C6
+
+## Slide 24 - Learning curves
+Contenu:
+- Train/Validation ROC-AUC par modele.
+- Signal de surapprentissage plus fort sur Gradient Boosting.
+Critere cible:
+- C3, C6
+
+## Slide 25 - Synthese bias-variance et robustesse
+Contenu:
+- Croiser CV gap, learning curves et performance test.
+- Identifier le profil le plus robuste.
+Critere cible:
+- C3
+
+## Slide 26 - Limites et validite externe
+Contenu:
+- Taille modeste.
+- Pas de validation externe.
+- Sensibilite au choix de seuil.
+Critere cible:
 - C6
 
-## Slide 12 - Conclusion + recommandation (50s)
+## Bloc F - Decision, perspectives, defence (Slides 27 a 28)
 
+## Slide 27 - Recommandation operationnelle
 Contenu:
-- Conclusion en une phrase.
-- Recommandation pratique:
-	- Naive Bayes pour maximiser le Recall.
-	- Regression Logistique pour meilleur ROC-AUC et bonne interpretabilite.
-
-Criteres couverts:
+- Naive Bayes si priorite au Recall depistage.
+- Regression Logistique si priorite ROC-AUC + interpretabilite.
+- Scenarios d'usage concrets.
+Critere cible:
 - C5, C6
 
-## Slides Backup Indispensables (pour C4)
+## Slide 28 - Perspectives non implementees + Q&A
+Contenu:
+- Tuning global (GridSearchCV/RandomizedSearchCV): non implemente ici.
+- Validation externe: non implementee ici.
+- Calibration post-hoc isotonic/platt: non implementee ici.
+- Ouverture questions jury.
+Critere cible:
+- C4, C6
 
-1. Backup N1 (bases): definitions + hyperparametres de chaque modele.
-2. Backup N2 (comparaison): avantages/inconvenients et cas d'usage.
-3. Backup N3 (pratique): pourquoi standardisation, CV, choix des metriques.
-4. Backup N4 (critique): surapprentissage, limites, ameliorations mathematiques.
+## Backups conseilles (hors 28 slides)
 
-## Script de Reponses Express (C4)
+1. Definitions N1 (rappels rapides des 3 modeles).
+2. Justification N2 (avantages/inconvenients par modele).
+3. Methodologie N3 (pipeline, baseline, CV, calibration, seuil).
+4. Analyse critique N4 (surapprentissage: CV gap + learning curves).
 
-1. N1: "J'ai choisi ces 3 modeles pour couvrir probabiliste simple, lineaire interpretable et ensemble non lineaire."
-2. N2: "Naive Bayes est rapide, LogReg est interpretable, GB capte mieux les interactions mais risque plus de surapprentissage."
-3. N3: "La standardisation stabilise les modeles sensibles a l'echelle; la CV reduit le risque de conclusion basee sur un split chanceux."
-4. N4: "Je diagnose le surapprentissage via l'ecart train/test en ROC-AUC et je propose tuning + calibration + validation externe."
+## Checklist finale avant soutenance
 
-## Checklist Finale Avant Soutenance
-
-1. Les tableaux CV et test sont lisibles et coherents.
-2. Les figures (matrices + ROC + importances) sont visibles sans zoom.
-3. Tu annonces une recommandation dependante du besoin clinique.
-4. Tu as repete les reponses N1-N4 en moins de 2 minutes.
+1. Chaque chiffre annonce est present dans une sortie du notebook.
+2. Aucun tableau incomplet.
+3. Chaque conclusion a une figure associee.
+4. Aucune methode citee sans implementation.
+5. Les elements non implementes sont annonces explicitement comme perspectives.
