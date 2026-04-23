@@ -1,0 +1,1094 @@
+
+RAPPORT D'ÉVALUATION
+Mini-projet Machine Learning
+Thème : Ridge & Lasso — Régression Régularisée
+
+Étudiants
+Bacha Ahmed · Laaribi Nourhene
+Cherif Chahd · Mahfoudh Yassmine
+
+Cours : Machine Learning — ISIC 2026
+NOTE GLOBALE
+10 / 20
+Avril 2026
+
+
+Introduction — Verdict d'ensemble
+
+Cette présentation aborde un sujet central du Machine Learning supervisé : la régularisation des modèles de régression. Les étudiants ont construit un plan en huit parties couvrant les rappels théoriques, la motivation par l'overfitting, les formalismes Ridge et Lasso, et une analyse comparative sur le dataset student-mat.csv. Si le travail témoigne d'une implication réelle et d'un effort de structuration, l'analyse détaillée révèle un nombre important d'erreurs conceptuelles, d'incohérences numériques et de lacunes théoriques majeures qui fragilisent la qualité globale de la présentation.
+
+Cependant, plusieurs déficiences structurelles et mathématiques nuisent à la qualité finale : incohérences numériques entre les sections, erreurs de notation, doublons de contenu et — point important soulevé dans ce rapport — une restriction implicite de Ridge et Lasso à la seule régression linéaire et polynomiale, alors que ces techniques s'appliquent à tout problème de régression (régression logistique, Poisson, etc.). Ce rapport suit l'ordre des diapositives pour que les remarques puissent être directement associées au support.
+
+Grille de notation par critère
+
+Critère
+Note /20
+Niveau
+Contenu & rigueur mathématique
+8
+
+ 
+ 
+
+
+
+Pédagogie & progression
+10
+
+ 
+ 
+
+
+
+Enchaînement & cohérence
+9
+
+ 
+ 
+
+
+
+Expérimentation & résultats
+12
+
+ 
+ 
+
+
+
+Visualisations & graphiques
+12
+
+ 
+ 
+
+
+
+Structure & transitions
+8
+
+ 
+ 
+
+
+
+NOTE FINALE (moyenne pondérée)
+10 / 20
+
+
+Analyse slide par slide
+
+Diapo 1 — Page de titre
+La page de titre est claire et bien mise en forme. Les quatre auteurs sont correctement identifiés. Aucune remarque particulière sur cette diapositive.
+
+Diapo 2 — Plan du cours
+Le plan en huit parties est logique dans son architecture générale. On note cependant que les sections 06, 07 et 08 (Ridge, Lasso, Analyse comparative) sont la raison d'être de la présentation, mais qu'elles n'apparaissent qu'après sept slides de rappels. Un plan plus équilibré aurait pu motiver d'emblée la nécessité de la régularisation avant d'entrer dans les rappels théoriques.
+
+Diapos 3–4 — Rappel : Régression linéaire simple
+ERREUR
+Diapo 4 — Exemples chiffrés présentés avant l'introduction du dataset
+
+
+Problème : Les coefficients illustratifs (β_studytime = +0.8, β_absences = −0.05, β_failures = −1.2, β_higher_yes = +1.5) sont commentés en diapo 4, alors que le dataset student-mat.csv n'est introduit qu'en diapo 10. Le lecteur ne sait pas encore que G3 est la variable cible, ce qui rend l'exemple incompréhensible hors contexte.
+
+
+Correction : Soit déplacer cette diapo après la diapo 10, soit remplacer les valeurs chiffrées par un exemple générique (x₁ = superficie, x₂ = étage…) qui ne dépend pas du dataset.
+
+
+REMARQUE
+Diapo 3 — Limite de la régression linéaire : point à développer
+
+
+Le titre « Pourquoi la régression linéaire ne suffit pas toujours » est une excellente accroche, mais la réponse donnée (linéarité, effet constant des variables) reste incomplète. Il manque la mention de la multicolinéarité et de l'instabilité des coefficients en haute dimension, deux problèmes que Ridge et Lasso résolvent directement.
+
+
+Diapos 5–6 — Régression linéaire multiple
+ERREUR
+Diapo 6 — Double notation de l'intercepte (erreur mathématique)
+
+
+Problème : L'équation écrite est G3 = β₀ + β₁x₁ + β₂x₂ + ... + βₚxₚ + a. Or β₀ est déjà l'ordonnée à l'origine. Le terme « a » en fin d'équation est redondant et mathématiquement incorrect. Cette erreur est d'autant plus visible qu'elle figure sur la même diapositive que la définition de la valeur de départ.
+
+
+Correction : Supprimer le terme « a » final. L'équation correcte est G3 = β₀ + β₁x₁ + ... + βₚxₚ.
+
+
+Diapo 7 — Forme matricielle
+La forme vectorielle ŷ = Xβ et la solution par moindres carrés β̂ = (XᵀX)⁻¹Xᵀy sont correctement présentées. Cette diapositive prépare bien la compréhension du pourquoi de Ridge : quand XᵀX est singulière ou mal conditionnée (multicolinéarité, trop peu d'observations), l'inverse n'est pas stable. Ridge remplace (XᵀX)⁻¹ par (XᵀX + αI)⁻¹, ce qui aurait pu être mentionné ici comme transition naturelle.
+
+Diapo 8 — Régression linéaire multivariée
+ERREUR
+Diapo 8 — Confusion terminologique : multiple vs multivariée
+
+
+Problème : La diapositive est intitulée « Régression linéaire multivariée » mais son contenu (plusieurs X pour un seul Y) décrit la régression multiple. La régression multivariée implique plusieurs variables cibles Y modélisées simultanément. Cette distinction est fondamentale en statistiques.
+
+
+Correction : Renommer la diapo « Régression linéaire multiple — forme générale » ou supprimer cette diapositive si elle fait doublon avec la précédente.
+
+
+Diapo 9 — Régression polynomiale
+La présentation de la régression polynomiale est correcte et bien motivée (croissance d'une population, trajectoire d'un objet). La formule y = a + b₁x + b₂x² + ... + bₙxⁿ est exacte. Cette diapositive sert de pont vers le problème d'overfitting, ce qui est une bonne articulation pédagogique.
+
+ATTENTION
+Diapo 9 — Régression polynomiale absente du tableau comparatif final
+
+
+La régression polynomiale est annoncée comme l'un des quatre modèles à comparer en diapo 10 (Objectif : comparer 4 modèles), mais elle n'apparaît pas dans le tableau de résultats de la diapo 32. Elle est simplement mentionnée comme « sur-apprentissage observé » sans métriques chiffrées. Soit ses résultats (MSE train/test, R²) doivent figurer dans le tableau final, soit l'objectif initial doit être reformulé.
+
+
+Diapo 10 — Dataset & Objectifs
+La mise en page de cette diapositive est claire : les quatre indicateurs (395 observations, 33 variables brutes, ~37 features encodées, cible G3) sont mis en valeur visuellement, et les quatre modèles à comparer sont identifiés avec une couleur distincte. C'est un bon ancrage pour la suite. Deux problèmes méritent cependant d'être signalés.
+
+ERREUR
+Le passage de 33 variables brutes a ~37 features encodées n'est jamais explique
+
+
+Problème : La diapositive affiche simultanément 33 Variables brutes et ~37 Features (encodées) sans aucune explication sur cette différence. Pour un lecteur non averti, ces deux chiffres semblent contradictoires ou arbitraires.
+
+
+Explication manquante : Le passage de 33 a ~37 s'explique par l'encodage one-hot (get_dummies) des variables catégorielles. Une variable a k modalités genere k-1 colonnes binaires avec drop_first=True. Par exemple, une variable 'job' a 5 modalités crée 4 colonnes dummy a la place d'une seule. Il suffit d'une phrase pour que ce saut numérique devienne compréhensible.
+
+
+Correction suggeree : Ajouter une note : L'encodage one-hot des variables categorielles (school, sex, Mjob, Fjob, reason, guardian...) transforme les 33 variables brutes en ~37 features numériques ou binaires.
+
+
+ERREUR
+Variables cles du dataset : formulation conceptuellement incompatible avec Ridge et Lasso
+
+
+Problème : Le tableau de gauche est intitule Variables cles du dataset et liste six variables (school, studytime, failures, absences, G1, G2, G3). Cette formulation implique une selection a priori de features jugees importantes avant tout entrainement, ce qui est conceptuellement contradictoire avec l'esprit meme de Ridge et Lasso.
+
+
+Pourquoi c'est un problème de fond : Ridge pénalise tous les coefficients simultanément et uniformément : il ne connait pas de variables clés avant de s'entrainer. Lasso opère une sélection automatique pendant l'optimisation, en annulant lui-même les coefficients non pertinents. Qualifier manuellement certaines variables de clés avant l'entrainement revient à introduire un biais de sélection qui court-circuite précisément ce que la régularisation est censée accomplir. La force de ces méthodes est justement de laisser l'algorithme décider de l'importance relative des features, sans intervention humaine préalable.
+
+
+Correction suggeree : Remplacer Variables clés du dataset par Apercu des variables disponibles ou Exemples de variables du dataset. Si l'on souhaite illustrer l'interprétation des coefficients, préciser explicitement qu'il s'agit d'exemples illustratifs et non d'une sélection préalable.
+
+
+Diapo 11 — Variables du dataset
+La classification en trois colonnes (Numériques / Catégorielles / Ordinales) est une bonne idée de structuration. Cependant, cette diapositive souffre du même problème conceptuel que la diapo 10, en plus accentue.
+
+ERREUR
+Diapo 11 — Sélection implicite et non justifiée de certaines variables
+
+
+Problème : La diapositive ne liste pas toutes les variables du dataset. Elle en présente un sous-ensemble (ex. Numériques : Age, Nombre d'échecs, Absences — seulement 3 variables sur 33) sans jamais indiquer que c'est une sélection partielle ni expliquer selon quel critère ces variables ont été retenues plutôt que d'autres.
+
+
+Pourquoi c'est problematique : Un lecteur qui découvre ce dataset pour la première fois conclura naturellement que ce sont les seules variables disponibles, ou pire, qu'elles ont été sélectionnées parce qu'elles sont plus importantes. Or dans le cadre de Ridge et Lasso, aucune variable ne devrait être privilégiée a priori : toutes les 33 variables brutes entrent dans le modèle et c'est la régularisation qui se charge de pondérer leur influence. Présenter un sous-ensemble sans le dire contredit directement cette philosophie.
+
+
+Incohérence interne : En diapo 10, on annonce 33 variables brutes et ~37 features encodées. En diapo 11, on n'en montre qu'une fraction sans le signaler. Ces deux diapositives consécutives donnent des informations qui ne se recoupent pas, ce qui brouille la compréhension du périmètre réel du dataset.
+
+
+Correction suggérée : Deux options acceptables : (1) Lister toutes les 33 variables classées par type — c'est faisable dans un tableau compact. (2) Si l'espace manque, ajouter explicitement la mention « Exemples représentatifs — liste complète en annexe » ou « 33 variables au total, dont voici un aperçu ». L'absence de cette précision est une omission qui induit en erreur.
+
+
+Diapos 12–13 — Surapprentissage & Overfitting
+La structure de ces deux diapositives est pertinente : identifier les causes de l'overfitting avant de motiver la régularisation est une bonne progression pédagogique. L'exemple des coefficients extrêmes (beta_studytime = +450 et beta_studytime2 = -450) est parlant. La boite de conclusion (Solution : La Régularisation) assure une bonne transition. Trois problèmes nécessitent cependant d'être corriges.
+
+ERREUR
+Diapo 13 — 66 features : chiffre incohérent avec les diapos 10 et 11
+
+
+Problème : La diapo 13 mentionne subitement 66 features (ratio 395/66 ≈ 6), alors que les diapos 10 et 11 parlaient de 33 variables brutes et ~37 features encodées. Ce saut de 37 a 66 n'est jamais explique et apparait sans transition.
+
+
+Origine du chiffre : Ces 66 features sont issues de l'application de PolynomialFeatures(degree=2) sur les ~37 features encodées. La transformation polynomiale de degré 2 génère tous les termes quadratiques (xi2) et tous les termes croises (xi*xj), ce qui donne approximativement 37 + 37 + C(37,2) = 37 + 37 + 666 termes... ou selon les choix d'implémentation, un nombre réduit. Quoi qu'il en soit, ce chiffre de 66 ne peut pas apparaitre sans explication après avoir annonce 37 features.
+
+
+Correction : Ajouter une phrase explicative : Le passage a 66 features resulte de l'application de PolynomialFeatures(degree=2) sur les 37 features initiales, qui génère les termes quadratiques et les interactions croisées entre variables. Ce saut numérique doit être relie aux diapos précédentes pour assurer la cohérence.
+
+
+ERREUR
+Diapo 13 — Confusion entre multicolinéarité et corrélation feature/cible
+
+
+Problème : La diapositive écrit : Multi colinéarité — G_avg très corrélée à G3. Sans contrainte : instabilité des coefficients, variance élevée. C'est une confusion entre deux notions statistiques distinctes.
+
+
+Ce qu'est la multicolinéarite : La multicolinéarite désigne une corrélation élevée entre variables explicatives (entre les X), par exemple G1 et G2 qui mesurent des performances scolaires similaires. Elle pose problème car la matrice XTX devient mal conditionnée, rendant les coefficients instables. C'est cela que Ridge résout en ajoutant alpha à XTX.
+
+
+Ce qu'est la corrélation G_avg / G3 : G_avg (moyenne de G1 et G2) est très corrélée à G3 parce qu'elle prédit bien la cible. C'est une corrélation feature-cible, qui est au contraire un indicateur de pouvoir prédictif. Ce n'est pas de la multicolinéarite. Confondre les deux revient à dire qu'une bonne variable prédictive est un problème, ce qui est l'inverse de la réalité.
+
+
+Correction : Remplacer l'exemple par un cas de vraie multicolinéarite : G1 et G2 sont fortement corrélées entre elles (r > 0.9). Sans contrainte, le modelé peut attribuer un coefficient très positif à l'une et très négatif à l'autre, s'annulant mutuellement, ce qui rend les coefficients instables et difficilement interprétables. Ridge résout ce problème en pénalisant les deux coefficients de façon symétrique.
+
+
+ATTENTION
+Diapo 13 — Le ratio factures/observations mériterait une explication théorique
+
+
+Observation : Le ratio 395/66 ≈ 6 est mentionné comme indicateur d'overfitting (trop de paramètres), mais sans explication théorique sur pourquoi ce ratio est problématique.
+
+
+Ce qui manque : Quand le nombre de factures p est grand par rapport au nombre d'observations n (régime p >> n ou p proche de n), les moindres carres ordinaires (OLS) tombent dans un régime d'interpolation : le modelé peut trouver des coefficients qui annulent parfaitement l'erreur sur les données d'entrainement, mais qui généralisent très mal. Dans le cas extrême ou p >= n, OLS n'a même plus de solution unique. C'est précisément l'une des motivations théoriques fondamentales de Ridge et Lasso : ils restabilisent le problème même quand p >= n.
+
+
+Amélioration suggérée : Ajouter une phrase du type : Avec 66 factures pour 395 observations (ratio ≈ 6), OLS commence à sur-apprendre. Si p se rapprochait de n, OLS deviendrait non identifiable. Ridge et Lasso résolvent ce problème en ajoutant une contrainte sur la norme des coefficients.
+
+
+ATTENTION
+Diapo 13 — Absence de courbe d'apprentissage
+
+
+L'exemple des coefficients extrêmes est une bonne intuition, mais il n'est accompagné d'aucune visualisation (courbe MSE train vs test en fonction du degré polynomial ou d’alpha). Une telle courbe rendrait le phénomène immédiatement perceptible pour un auditoire non expert et constituerait un argument visuel bien plus fort.
+
+
+Diapo 14 — Titre de section Ridge & Lasso
+Diapositive de transition sobre et efficace. Aucune remarque.
+
+Diapos 15–16 — Ridge (Régularisation L2)
+POINT FORT
+Bonne présentation du formalisme général Ridge
+
+
+La formule min (Σ(yi - yi_hat)2 + α·Σβj2), le rôle du paramètre α et l'interprétation géométrique (boule sphérique sans angles sur les axes → jamais exactement zéro) sont correctement présentes. La décomposition en trois colonnes (Comment ça marche / Effet sur les coefficients / Quand ça aide) est une structure claire.
+
+
+ERREUR
+Diapo 16 — Contradiction interne majeure dans la description de l'effet Ridge sur les coefficients
+
+
+La contradiction : La colonne Effet sur les coefficients contient simultanément trois affirmations incompatibles entre elles :
+
+
+Affirmation 1 : Ridge réduit TOUS les coefficients uniformément.
+
+
+Affirmation 2 : Les plus petits sont réduits proportionnellement.
+
+
+Affirmation 3 : G_avg reste dominant mais contrôle.
+
+
+Pourquoi c'est contradictoire : Si la réduction était vraiment uniforme (même montant absolu pour tous les coefficients), alors G_avg ne pourrait pas rester dominant — il serait autant réduit que les petits coefficients. Et si les plus petits sont réduits proportionnellement davantage, ce n'est précisément pas une réduction uniforme. Ces trois bullets se contredisent mutuellement et ne peuvent pas coexister dans la même colonne.
+
+
+La réalité mathématique de Ridge : La solution Ridge est β_ridge = (XTX + αI)⁻¹ XTy. Dans le cas simplifie ou les factures sont orthogonales, cela se réduit à β_ridge_j = β_OLS_j / (1 + α/λj), ou λj est la variance de la feature j. L'effet est donc un shrinkage multiplicatif : chaque coefficient est multiplié par un facteur strictement inferieur a 1. Ce facteur est le même pour tous les coefficients (dans le cas standardise), ce qui signifie que les grands coefficients sont davantage réduits en valeur absolue, et les petits coefficients davantage en proportion relative. Ce n'est ni une réduction uniforme au sens absolu, ni une réduction plus forte des petits.
+
+
+Ce qu'il faut écrire : Ridge applique un shrinkage proportionnel à la magnitude de chaque coefficient : les grands coefficients sont davantage réduits en valeur absolue, mais aucun n'atteint exactement zéro. Le terme uniformément est doublement faux : faux par rapport aux autres bullets de la même diapo, et faux mathématiquement. Il faut le remplacer par : Ridge réduit tous les coefficients vers zéro via un facteur multiplicatif commun — les coefficients les plus grands en valeur absolue perdent donc plus en valeur absolue, mais tous restent non nuls.
+
+
+ERREUR
+Diapo 16 — Mention de la régression logistique (RL) parachutée sans introduction préalable
+
+
+Problème : La colonne Quand ça aide ? contient le bullet Coefficients instables en RL. Cette référence à la régression logistique (RL) apparait sans aucune introduction préalable dans la présentation. Jusqu'a cette diapositive, seules la régression linéaire et la régression polynomiale ont été présentées. Un étudiant qui suit le fil de l'expose ne sait pas ce qu'est la régression logistique à ce stade, ni pourquoi Ridge l'aiderait.
+
+
+Lien avec une lacune antérieure : C'est précisément la conséquence de ne pas avoir généralise Ridge et Lasso dès le départ (cf. remarque transversale). Si une diapositive avait expliqué que ces pénalités s'appliquent à tout modelé paramétrique — linéaire, logistique, Poisson — cette mention aurait eu un sens. Sans ce cadre, elle est incompréhensible pour l'auditoire cible et donne l'impression d'une liste copiée sans compréhension du contexte.
+
+
+Correction : Soit supprimer cette mention si la régression logistique n'est pas traitée dans la présentation, soit ajouter avant cette diapo une slide de généralisation qui l'introduit explicitement.
+
+
+ERREUR
+Diapo 16 — Interprétation géométrique floue, parachutée et visuellement non étayée
+
+
+Ce qui est écrit : Interprétations géométrique : La contrainte L2 est une BOULE SPHERIQUE dans l'espace des β. La solution MSE se projette sur la boule → les coefficients sont réduits mais jamais à zéro (la boule n'a pas d'angles sur les axes).
+
+
+Problème 1 — Vocabulaire non prépare : L'expression espace des β suppose que l'auditoire visualise un espace à p dimensions dont les axes sont les coefficients β1, β2, ..., βp. Cette notion n'a été ni introduite ni définie nulle part dans la présentation. De même, la projection de la solution MSE sur une boule est un concept d'optimisation sous contrainte qui nécessite une figure pour être compris — une phrase seule est insuffisante.
+
+
+Problème 2 — Conclusion sans démonstration visuelle : La conclusion les coefficients ne sont jamais à zéro car la boule n'a pas d'angles sur les axes est correcte mathématiquement, mais elle reste une affirmation abstraite sans la figure comparative qui la rend intuitive. L'argument des angles est précisément ce qui distingue L2 de L1 : la boule L2 est lisse (pas de coins sur les axes de coordonnées), donc la solution optimale ne tombe presque jamais exactement sur un axe. A contrario, le losange L1 a des coins sur chaque axe, ce qui favorise les solutions sparses. Sans cette comparaison visuelle cote à cote, l'interprétation géométrique ne transmet aucune intuition réelle.
+
+
+Problème 3 — Position dans la diapo : Cette interprétation est présentée en bas de diapo comme une note de bas de page, separee du contenu principal par un fond de couleur diffèrent. Ce traitement éditorial la relègue au rang d'anecdote alors qu'elle constitue l'un des arguments les plus puissants pour comprendre pourquoi Ridge et Lasso se comportent différemment. Elle mérite une diapositive dédiée avec une figure.
+
+
+Correction suggérée : Créer une diapositive dédiée à l'interprétation géométrique comparative Ridge vs Lasso, avec une figure montrant cote a cote : (gauche) la boule L2 et les courbes de niveau de la MSE dont l'intersection se produit rarement sur un axe ; (droite) le losange L1 et les mêmes courbes dont l'intersection se produit préférentiellement aux coins, c'est-à-dire la ou un coefficient est exactement zéro. Cette figure est le moyen le plus efficace de montrer pourquoi Lasso sélectionne des variables et Ridge non.
+
+
+ATTENTION
+Lacune importante : Ridge ne se limite pas à la régression linéaire
+
+
+Problème conceptuel : La présentation positionne implicitement Ridge (et Lasso) comme des extensions de la seule régression linéaire ou polynomiale. C'est une simplification trompeuse.
+
+
+Ce que Ridge et Lasso couvrent en réalité : La régularisation L1/L2 s'applique à tout modèle dont la fonction de perte est différentiable par rapport aux coefficients. Cela inclut : la régression logistique (classification binaire), la régression de Poisson (comptages), la régression multinomiale, les modèles linéaires généralisés (GLM), et même les réseaux de neurones (weight decay = L2). Il aurait suffit d'une ligne ou d'un encadré pour généraliser.
+
+
+Exemple manquant : En régression logistique, la fonction de coût est la log-vraisemblance négative. Ridge y ajoute α·Σβⱼ² et Lasso α·Σ|βⱼ|, exactement comme en régression linéaire. En scikit-learn, le paramètre C de LogisticRegression est l'inverse de α (C = 1/α). Ce point aurait enrichi significativement la portée pédagogique du travail.
+
+
+Diapo 17 — Lasso (Régularisation L1)
+POINT FORT
+Idée principale bien formulée
+
+
+La distinction clé entre Ridge et Lasso — Lasso peut réduire certains coefficients à exactement zéro — est correctement énoncée. La formule min(Σ(yᵢ − ŷᵢ)² + α·Σ|βⱼ|) est exacte.
+
+
+ATTENTION
+Même lacune de généralisation que pour Ridge
+
+
+Le Lasso est présenté uniquement dans le cadre de la régression. Il aurait été pertinent de mentionner que la pénalité L1 s'applique également à la régression logistique (paramètre penalty='l1' dans scikit-learn), produisant des modèles de classification sparses, particulièrement utiles en bioinformatique ou en traitement du langage lorsque le nombre de factures est très grand devant le nombre d'observations.
+
+
+Diapos 18–19 — Hypothèses & Conditions d'application
+ERREUR
+Doublon non justifié entre les diapos 18 et 19
+
+
+Problème : Les deux diapositives présentent exactement les quatre mêmes conditions (normalisation obligatoire, relation linéaire, choisir Ridge si factures corrélées, choisir Lasso si parcimonie souhaitée) avec un texte quasi-identique. Cette répétition alourdit la présentation sans apporter d'information supplémentaire.
+
+
+Correction : Fusionner en une seule diapositive. La diapo 19 ajoute un détail utile (21/37 factures retenues par Lasso) qui peut être conservé dans la version fusionnée.
+
+
+Diapo 20 — Métriques spécifiques (titre de section)
+ATTENTION
+Diapositive vide sans contenu
+
+
+Cette diapositive n'affiche qu'un sous-titre de section (« Chemin de régularisation — R² ajusté — Features actives (Lasso) — RidgeCV / LassoCV ») et aucun contenu. Elle donne l'impression d'un travail inachevé. Le contenu attendu apparaît en diapo 21, mais sans cette transition vide, la diapo 21 serait plus directement accessible.
+
+
+Diapo 21 — Métriques spécifiques à la régularisation
+Le contenu de cette diapositive est de bonne qualité : le chemin de régularisation, le R² ajusté, le comptage des factures actives et RidgeCV/LassoCV sont tous correctement définis. La formule R²_adj = 1 − (1−R²)·(n−1)/(n−p−1) est exacte.
+
+Diapo 22 — Hyperparamètres (titre de section)
+ATTENTION
+Deuxième diapositive vide
+
+
+Même observation qu'en diapo 20 : seul le sous-titre « Alpha Ridge [0.01 → 1000] — Alpha Lasso [0.0001 → 1] — Impact sur les coefficients » est affiché. Le contenu réel se trouve en diapo 23. Ces deux slides de transition vides (20 et 22) doivent être supprimées ou intégrées à leur diapositive de contenu respective.
+
+
+ERREUR
+Diapos 21–22 — Les intervalles de α sont présentés sans visualisation comparative qui les justifie
+
+
+Le problème de fond : La diapo 21 présente les chemins de régularisation (coefficients en fonction de log α) et la diapo 22 annonce les intervalles Ridge [0.01 ; 1000] et Lasso [0.0001 ; 1] sans qu'aucune visualisation ne relie ces deux éléments. Ces intervalles apparaissent comme des choix arbitraires : pourquoi Ridge peut aller jusqu'à 1000 alors que Lasso s'arrête à 1 ? Aucun graphique ne répond à cette question.
+
+
+Ce qui manque : une courbe MSE train/test superposée au chemin de régularisation. La visualisation absente est un graphique à deux axes en fonction de log(α) : (1) les courbes d'évolution des coefficients, déjà présentes, et (2) les courbes MSE train et MSE test. Ce second axe est indispensable : c'est lui qui justifie visuellement le choix de l'intervalle et la localisation du α optimal.
+
+
+Lecture attendue pour Ridge : Pour α très petit, MSE train est faible et MSE test est élevée → overfitting. Pour α très grand (proche de 1000), les deux MSE augmentent → underfitting (coefficients trop comprimés). Le α optimal se trouve au creux de la courbe MSE test, typiquement autour de 1 à 10 sur ce dataset. C'est ce creux qu'il faut voir pour justifier d'explorer jusqu'à 1000 — il faut les deux branches de la courbe en U.
+
+
+Lecture attendue pour Lasso : La pénalité L1 étant plus agressive, le creux MSE test apparaît pour des valeurs bien plus petites (autour de 0.01 à 0.1 sur ce dataset). Au-delà de α = 1, Lasso annule presque tous les coefficients et le modèle devient très sous-ajusté. C'est cela qui justifie l'intervalle [0.0001 ; 1]. Sans cette courbe, la différence d'échelle entre Ridge et Lasso (facteur 1000) reste incompréhensible.
+
+
+Correction prioritaire : Ajouter une diapositive intitulée « Chemin de régularisation et courbe de validation — Ridge vs Lasso » présentant côte à côte : (axe gauche) évolution des coefficients en fonction de log(α), (axe droit) MSE train et MSE test en fonction de log(α), avec une ligne verticale indiquant le α optimal sélectionné par cross-validation. Cette diapositive remplacerait les slides vides 20 et 22 et constituerait la justification visuelle la plus importante de toute la présentation.
+
+
+Diapo 23 — L'hyperparamètre Alpha
+La présentation des plages d'alpha pour Ridge [0.01 ; 1000] et Lasso [0.0001 ; 1] avec l'effet associé est claire dans sa forme. Cependant, trois lacunes majeures rendent cette diapositive incomplète : la différence d'échelle non justifiée, l'absence de stratégie de construction de la grille, et l'absence de conseils pratiques sur la convergence.
+
+ATTENTION
+Différence d'échelle entre Ridge et Lasso non expliquée
+
+
+Pourquoi Ridge nécessite α jusqu'à 1000 alors que Lasso dépasse rarement 1 ? La pénalité L2 pénalise les carrés des coefficients (qui peuvent être très grands en OLS), tandis que la pénalité L1 pénalise les valeurs absolues et produit la sparsité pour des α bien plus petits. Cette explication manque et laisse une impression d'arbitraire.
+
+
+ERREUR
+Stratégie de sélection de α absente — aucune justification de la grille de recherche
+
+
+Ce qui est présenté : Des intervalles et quelques valeurs qualitatives, sans expliquer comment construire une grille de recherche intelligente.
+
+
+Pourquoi l'échelle logarithmique est obligatoire : Une grille linéaire [1, 2, ..., 1000] concentre 999 valeurs dans la zone d'underfitting et n'explore quasiment pas la zone critique [0.01 ; 10]. La bonne pratique est np.logspace(start, stop, n_points), qui couvre uniformément chaque décade. C'est le choix fait dans le code (diapo 29) mais jamais justifié.
+
+
+Stratégie complète en 4 étapes (absente) : Étape 1 — Grille large sur 6 à 8 décades (np.logspace(-4, 4, 50)) pour identifier la décade du α optimal. Étape 2 — Grille fine : zoomer sur cette décade avec 200 points. Étape 3 — Cross-validation : RidgeCV ou LassoCV. Étape 4 — Vérification visuelle : tracer MSE train et MSE test en fonction de log(α) pour confirmer que le minimum est bien capturé dans la grille.
+
+
+Choix cv=10 non justifié : Sur 395 observations, cv=10 donne des folds d'entraînement de ~355 points — raisonnable. Sur un très petit dataset (n < 100), Leave-One-Out CV serait préférable. Ce raisonnement aurait dû être explicité.
+
+
+ERREUR
+max_iter et convergence de Lasso — paramètre critique traité comme un détail de code
+
+
+Ce qui est écrit dans le code (diapo 31) : LassoCV(cv=10, max_iter=10000, n_alphas=200). La valeur max_iter=10000 est présente mais jamais commentée.
+
+
+Ridge n'a pas de problème de convergence : Ridge possède une solution analytique exacte β_Ridge = (XTX + αI)⁻¹XTy. Ce calcul est direct et toujours garanti — pas d'algorithme itératif, donc pas de risque de non-convergence.
+
+
+Lasso peut ne pas converger : Lasso utilise la descente de coordonnées (coordinate descent) : à chaque itération, on optimise un seul coefficient βj en gardant les autres fixes, en boucle jusqu'à convergence. Si max_iter est trop petit, l'algorithme s'arrête prématurément et retourne une solution sous-optimale — ce qui fausse toute l'analyse. La valeur par défaut de scikit-learn est max_iter=1000, souvent insuffisante quand α est petit ou quand les features sont corrélées.
+
+
+Règle pratique : Fixer max_iter ≥ 5000, voire 10000 pour les datasets à nombreuses features. Surveiller le ConvergenceWarning de scikit-learn : s'il apparaît, augmenter max_iter. Ce conseil aurait dû figurer explicitement dans la diapositive.
+
+
+Tableau comparatif convergence Ridge vs Lasso : (voir tableau ci-dessous)
+
+
+Aspect
+Ridge
+Lasso
+Algorithme
+Solution analytique exacte (XTX + αI)-1XTy
+Descente de coordonnées (itératif)
+Convergence
+Toujours garantie
+Non garantie si max_iter trop petit
+max_iter
+Sans objet
+≥ 5000 recommandé (10000 si corrélées)
+Warning scikit-learn
+Aucun
+Surveiller ConvergenceWarning
+Complexité
+O(p³) — inversion matricielle
+O(n·p·k) — k = nb itérations
+Grille alpha
+np.logspace(-2, 3, 200) — 5 décades
+np.logspace(-4, 0, 200) — 4 décades
+CV recommandée
+RidgeCV(alphas=grille, cv=10)
+LassoCV(cv=10, n_alphas=200, max_iter=10000)
+
+
+Diapo 24 — Titre de section Analyse Comparative
+Diapositive de transition. Aucune remarque.
+
+Diapo 25 — Section 0 : Présentation du modèle
+ATTENTION
+Section 0 hors séquence logique
+
+
+Une « Section 0 — Présentation du modèle » apparaît après les diapos 15-23 déjà consacrées à Ridge et Lasso. Cette numérotation crée une régression logique : on présente la théorie, puis on recule en « Section 0 » pour redéfinir ce qu'on vient d'expliquer. Cette section aurait dû ouvrir la partie comparative (avant diapo 27), pas la précéder.
+
+
+Diapo 26 — Chargement & Préparation des données
+POINT FORT
+Bonne pratique : mise en garde contre le data leakage sur StandardScaler
+
+
+La précision que StandardScaler doit être entraîné (fit) uniquement sur X_train, puis appliqué (transform) à X_train ET X_test, est correcte. L'encadré Anti Data Leakage est une bonne initiative pédagogique.
+
+
+ERREUR
+Diapo 26 — Absence du pipeline recommandé avant le code : l'ordre des opérations n'est jamais justifié
+
+
+Ce qui manque : Avant de présenter le moindre bout de code, la présentation aurait dû montrer un pipeline visuel complet expliquant l'ordre logique de chaque étape de préparation et son pourquoi. Sans ce pipeline, le code qui suit semble une succession d'opérations arbitraires.
+
+
+Pipeline recommandé (absent) : Étape 1 : Chargement des données brutes (pd.read_csv). Étape 2 : Feature engineering — créer g_avg, alc_total, parent_edu (opérations arithmétiques sur colonnes existantes, aucun risque de leakage). Étape 3 : Encodage one-hot avec get_dummies — AVANT le split (voir remarque suivante). Étape 4 : Séparation train/test (train_test_split, 80/20). Étape 5 : Standardisation — fit uniquement sur X_train, transform sur X_train et X_test. Étape 6 : Entraînement des modèles. Étape 7 : Évaluation sur X_test. Ce pipeline doit apparaître sous forme de schéma ou de liste numérotée AVANT toute ligne de code, pour ancrer le raisonnement.
+
+
+ERREUR
+Diapo 26 — get_dummies avant ou après le split ? Confusion non résolue dans la présentation
+
+
+La question : La diapositive mentionne l'encodage one-hot (get_dummies) et le split train/test sans jamais préciser lequel vient en premier. C'est une question fondamentale que tout praticien doit savoir trancher.
+
+
+La réponse correcte : get_dummies AVANT le split. L'encodage one-hot est une transformation structurelle du schéma des colonnes : il convertit une colonne catégorielle (ex. 'school' avec modalités 'GP' et 'MS') en colonnes binaires (ex. 'school_MS'). Ce n'est pas un apprentissage statistique — il ne calcule aucune statistique à partir des données (pas de moyenne, pas d'écart-type). Il est donc impossible qu'il cause un leakage statistique entre train et test.
+
+
+Pourquoi get_dummies doit quand même être fait avant le split : Si get_dummies est appliqué séparément sur X_train et X_test, les deux jeux peuvent avoir des structures de colonnes différentes — par exemple si une modalité rare n'apparaît que dans X_test. Cela provoquerait une erreur à la prédiction car le modèle entraîné attend un nombre fixe de colonnes. En appliquant get_dummies sur le dataset complet AVANT le split, on garantit que X_train et X_test ont exactement le même schéma de colonnes.
+
+
+Ce qui cause le vrai leakage — StandardScaler APRÈS le split : Le leakage statistique vient de StandardScaler, pas de get_dummies. StandardScaler calcule la moyenne et l'écart-type de chaque feature. Si on l'applique sur le dataset complet avant le split, les statistiques de test contaminent l'entraînement. C'est pourquoi fit_transform doit être appliqué uniquement sur X_train, et transform (sans fit) sur X_test. La présentation a raison sur ce point mais n'a jamais expliqué pourquoi get_dummies n'est pas soumis à la même règle.
+
+
+Tableau récapitulatif de l'ordre correct (absent) : (voir tableau ci-dessous)
+
+
+Opération
+Avant split ?
+Après split ?
+Raison
+Feature engineering (g_avg, alc_total...)
+OUI
+—
+Calcul sur colonnes existantes, aucun risque
+get_dummies (encodage one-hot)
+OUI
+—
+Transformation structurelle, pas statistique
+train_test_split
+—
+—
+Point de séparation
+StandardScaler fit_transform
+NON
+Sur X_train uniquement
+Calcule moyenne/std → leakage si sur tout
+StandardScaler transform
+—
+Sur X_test uniquement
+Applique les stats de X_train
+Entraînement du modèle
+NON
+Sur X_train_scaled
+Jamais sur les données de test
+
+
+Diapos 27–28 — Régression linéaire (Baseline OLS)
+ERREUR
+Incohérence critique des métriques OLS entre les diapos 27, 32 et 33
+
+
+Problème : Diapo 27 : RMSE test = 2.488, R² test = 0.698. Diapo 32 : RMSE = 2.1652, R² = 0.7596. Diapo 33 : R² = 0.663. Trois valeurs contradictoires pour le même modèle OLS indiquent plusieurs runs non harmonisés.
+
+
+Correction : Fixer random_state = 42 dans tout le notebook, relancer une seule fois, et reporter les métriques dans un tableau centralisé commun à toutes les diapos.
+
+
+ERREUR
+Diapo 28 — Le QQ plot ne justifie pas le passage à Ridge/Lasso
+
+
+Ce qui est présenté : Le QQ plot des résidus OLS est utilisé pour conclure que « le modèle OLS seul n'est pas suffisant → régularisation nécessaire ». C'est un raisonnement incorrect.
+
+
+Ce que le QQ plot teste réellement : Le QQ plot (Quantile-Quantile plot) compare la distribution empirique des résidus à une distribution normale théorique. Les déviations aux extrémités indiquent que les résidus ne sont pas parfaitement normaux. Cela peut motiver l'utilisation d'une régression robuste ou d'une transformation de la variable cible — pas nécessairement une régularisation.
+
+
+La vraie justification du passage à Ridge/Lasso : La motivation correcte est le gap train/test : R²_train = 0.843 vs R²_test = 0.698, soit un écart de 0.145. Cet écart signale un overfitting — le modèle mémorise les données d'entraînement et généralise mal. C'est cela, et non le QQ plot, qui justifie la régularisation. Le bon visuel de justification est une courbe MSE train vs MSE test en fonction de la complexité du modèle (degré polynomial ou valeur de α), montrant la divergence entre les deux courbes en zone d'overfitting.
+
+
+Autres visuels pertinents pour justifier Ridge/Lasso (absents) : (1) Graphique des coefficients OLS : montrer que certains sont extrêmement grands en valeur absolue est un signal d'instabilité. (2) Matrice de corrélation des features : visualiser la multicolinéarité entre G1, G2 et g_avg justifie Ridge. (3) Variance des coefficients OLS sur des bootstraps : si les coefficients changent fortement selon le sous-échantillon, la régularisation s'impose. Aucun de ces visuels n'est présent.
+
+
+ERREUR
+Diapo 28 — Pourquoi la régression polynomiale n'a-t-elle pas été testée comme modèle amélioré ?
+
+
+Incohérence avec les objectifs : La diapo 10 annonçait quatre modèles à comparer : OLS (baseline), Polynomiale (degree=2), Ridge (L2), Lasso (L1). La régression polynomiale a été utilisée uniquement pour illustrer l'overfitting en diapo 13, puis abandonnée. Elle n'apparaît pas dans le tableau comparatif final (diapo 32).
+
+
+Ce qui aurait dû être fait : La progression logique attendue après avoir établi l'OLS comme baseline est : (1) Tester la régression polynomiale degree=2 → observer l'overfitting (R²_train élevé, R²_test dégradé). (2) Appliquer Ridge sur le modèle polynomial → régulariser les 66 features. (3) Appliquer Lasso sur le modèle polynomial → sélectionner les features quadratiques pertinentes. C'est cette progression Baseline → Overfitting → Régularisation qui aurait donné tout son sens à la présentation. En sautant les étapes 1-2-3, les étudiants ont privé leur travail de sa démonstration centrale.
+
+
+Résultat attendu (non calculé) : On s'attendrait à ce que Ridge ou Lasso appliqué au modèle polynomial degree=2 améliore le R²_test par rapport à l'OLS linéaire simple, tout en évitant l'overfitting de la polynomiale non régularisée. Ne pas avoir conduit cette expérience est une opportunité manquée majeure au regard des objectifs annoncés.
+
+
+Diapos 29–31 — Ridge L2 et Lasso L1 : chemins de régularisation
+POINT FORT
+Chemins de régularisation bien présentés
+
+
+Les graphiques Ridge Path et Lasso Path (coefficients vs log α) sont le point pédagogique le plus fort. La comparaison côte à côte (diapo 30) avec « Garde : TOUTES les features » vs « Sélection : 21/37 » est claire.
+
+
+ERREUR
+Diapo 29 — scoring='neg_mean_squared_error' parachuté sans explication
+
+
+Ce qui est écrit : RidgeCV(alphas=alphas_grid, cv=10, scoring='neg_mean_squared_error'). Ce paramètre apparaît sans aucune explication.
+
+
+Pourquoi le préfixe 'neg_' ? scikit-learn suit une convention unifiée : toutes ses fonctions de scoring cherchent à MAXIMISER un score. Les métriques d'erreur (comme MSE) sont à minimiser, ce qui est contradictoire avec cette convention. Pour les rendre compatibles, scikit-learn les nége : neg_mean_squared_error = −MSE. On maximise donc −MSE, ce qui revient bien à minimiser MSE. Sans cette explication, un étudiant qui voit neg_mean_squared_error pour la première fois ne comprend pas pourquoi la métrique est négative.
+
+
+Est-ce la bonne métrique pour sélectionner α ? C'est un choix discutable. MSE (et donc neg_MSE) est sensible aux outliers car elle élève les erreurs au carré. Pour un dataset comme student-mat.csv où des élèves peuvent avoir des notes très atypiques (G3 = 0 après plusieurs échecs), une erreur de 5 points compte pour 25 dans la MSE, ce qui peut biaiser le choix de α vers une sur-régularisation. Des alternatives plus robustes existent : neg_mean_absolute_error (MAE, moins sensible aux outliers) ou r2 (R², directement interprétable). Le choix de neg_MSE aurait dû être explicitement justifié.
+
+
+Critère recommandé selon le contexte : Si l'objectif est la performance globale et qu'il n'y a pas d'outliers majeurs : neg_MSE ou neg_RMSE. Si des outliers sont présents ou si l'interprétabilité de l'erreur est importante : neg_MAE. Si l'on veut comparer des modèles avec des nombres de features différents : r2_adjusted. Sur ce dataset, neg_MAE aurait probablement été plus robuste.
+
+
+ERREUR
+Diapo 30 — « 21 features retenues par Lasso » : résultat présenté comme un choix délibéré
+
+
+Ce qui est écrit : « Sélection : 21 features retenues / 37 total ». Ce chiffre est présenté comme s'il était intentionnel.
+
+
+Ce que ce chiffre est réellement : 21 est un résultat, pas un choix. C'est la conséquence directe du α optimal sélectionné par LassoCV (α ≈ 0.08 dans leur code). Pour ce α précis, le seuil de soft-thresholding (α/2 ≈ 0.04) annule exactement 16 des 37 coefficients et en conserve 21. Si α avait été légèrement plus grand, peut-être 18 features auraient été retenues. Si α avait été plus petit, peut-être 25. Le chiffre 21 n'est donc ni un objectif ni un paramètre — c'est une sortie de l'optimisation.
+
+
+Ce qui aurait dû être dit : « Pour le α optimal de 0.08 sélectionné par cross-validation, Lasso retient 21 features sur 37. Ce nombre varie avec α : tracer le nombre de features actives en fonction de log(α) permet de visualiser comment Lasso opère progressivement sa sélection. » Cette explication aurait transformé un chiffre opaque en résultat compréhensible.
+
+
+ERREUR
+Diapo 31 — LassoCV : critère d'arrêt tol absent — erreur fatale
+
+
+Ce qui est écrit : LassoCV(cv=10, max_iter=10000, n_alphas=200, random_state=42). Le paramètre tol est absent — et c'est une erreur grave.
+
+
+Les deux critères d'arrêt de la descente de coordonnées : La descente de coordonnées de Lasso s'arrête quand l'UN ou l'AUTRE des deux critères suivants est atteint. Critère 1 — max_iter : limite dure sur le nombre d'itérations (présent dans le code). Critère 2 — tol : tolérance sur la convergence. L'algorithme s'arrête quand la variation maximale des coefficients entre deux itérations est inférieure à tol. La valeur par défaut de scikit-learn est tol=1e-4.
+
+
+Pourquoi l'absence de tol est une erreur fatale : tol est LE critère de convergence réel. max_iter est une sécurité. Si max_iter est atteint AVANT que tol soit satisfait, l'algorithme s'arrête sans avoir convergé et retourne une solution approximative — sans avertissement visible si le ConvergenceWarning n'est pas capturé. Ne jamais mentionner tol revient à ne jamais expliquer le critère de convergence de l'algorithme qu'on utilise. C'est l'équivalent de ne jamais expliquer le critère d'arrêt d'une descente de gradient.
+
+
+Valeurs recommandées : tol=1e-4 (défaut scikit-learn) convient pour la plupart des cas. Pour une précision accrue (petits datasets ou coefficients très petits) : tol=1e-6. Pour accélérer sur de grands datasets au prix d'une légère imprécision : tol=1e-3. Le code aurait dû expliciter LassoCV(cv=10, max_iter=10000, tol=1e-4, n_alphas=200) et commenter que l'algorithme converge quand max(|Δβj|) < tol.
+
+
+Code corrigé avec les deux critères commentés (absent de la présentation) : lasso_cv = LassoCV(cv=10,           # 10-fold cross-validation interne,   n_alphas=200,       # 200 valeurs de alpha sur grille log,   max_iter=10000,     # Limite max d'itérations par alpha (sécurité),   tol=1e-4,           # Critère de convergence : arrêt quand max(|Δβ|) < tol,   random_state=42     # Reproductibilité)
+
+
+ERREUR
+Diapo 29 vs 31 — Asymétrie RidgeCV/LassoCV non expliquée : pourquoi le critère de sélection de α diffère entre les deux
+
+
+Ce qui est présenté : RidgeCV reçoit une grille explicite (alphas=alphas_grid) et un scoring explicite (scoring='neg_mean_squared_error'). LassoCV, lui, ne reçoit aucune grille — seulement n_alphas=200. Cette asymétrie n'est jamais expliquée et laisse croire que les deux fonctions font la même chose de manière différente, alors qu'elles implémentent des algorithmes fondamentalement distincts.
+
+
+Pourquoi RidgeCV impose une grille explicite : RidgeCV exploite la décomposition en valeurs singulières (SVD) de X pour calculer la solution Ridge pour TOUS les α de la grille en un seul calcul matriciel. C'est algorithmiquement très efficace (Leave-One-Out CV analytique via Sherman-Morrison). L'utilisateur doit fournir la grille car RidgeCV n'a aucun moyen de savoir a priori quelle plage de α est pertinente pour ses données.
+
+
+Pourquoi LassoCV construit sa propre grille : LassoCV exploite une propriété mathématique de la pénalité L1 : il existe une valeur alpha_max au-delà de laquelle TOUS les coefficients sont exactement nuls. Cette valeur se calcule analytiquement : alpha_max = max(|XTy|) / n. LassoCV part de alpha_max et descend jusqu'à alpha_max × eps (eps=1e-3 par défaut), en plaçant n_alphas=200 points régulièrement espacés sur une échelle logarithmique. Cette approche garantit que la grille couvre exactement la plage utile — de l'absence totale de régularisation jusqu'au modèle nul.
+
+
+Ce qui aurait dû être expliqué : La présentation devait montrer que RidgeCV et LassoCV utilisent deux stratégies différentes car Ridge a une solution analytique (compatible avec la LOO-CV analytique) et Lasso est itératif (compatible avec le warm-starting sur une grille calculée depuis alpha_max). Ce n'est pas une incohérence de code — c'est une différence algorithmique fondamentale qui n'a jamais été mentionnée.
+
+
+ERREUR
+Diapo 31 — n_alphas=200 sans intervalle précisé : 200 points dans un intervalle inconnu
+
+
+Ce qui est écrit : LassoCV(cv=10, max_iter=10000, n_alphas=200, random_state=42). Aucune mention de l'intervalle sur lequel ces 200 valeurs sont générées.
+
+
+Comment LassoCV calcule l'intervalle automatiquement : LassoCV calcule alpha_max = max(|XTy|) / n_samples. Cela représente le plus petit α qui annule tous les coefficients. La grille descend ensuite jusqu'à alpha_min = alpha_max × eps, avec eps=1e-3 par défaut. Les 200 valeurs sont espacées sur une échelle logarithmique entre alpha_max et alpha_min.
+
+
+Le problème : alpha_max n'est jamais affiché ni commenté. La valeur de alpha_max dépend des données (X et y). Sur ce dataset, après standardisation, alpha_max se situe typiquement entre 1 et 10. L'intervalle réel exploré est donc approximativement [alpha_max × 1e-3, alpha_max], soit environ [0.001 ; 5] — ce qui correspond grossièrement à l'intervalle annoncé en diapo 22 ([0.0001 ; 1]). Mais cette concordance n'est jamais vérifiée ni montrée. Présenter n_alphas=200 sans préciser l'intervalle revient à dire « je fais 200 mesures » sans dire entre quelles bornes.
+
+
+Correction recommandée — deux options : Option 1 (transparente) : Afficher alpha_max avant de lancer LassoCV (alpha_max = np.max(np.abs(X_train_scaled.T @ y_train)) / len(y_train)), puis passer alphas=np.logspace(np.log10(alpha_max*1e-3), np.log10(alpha_max), 200) explicitement, comme pour Ridge. Option 2 (automatique mais documentée) : Conserver n_alphas=200 mais afficher lasso_cv.alphas_[[0,-1]] après le fit pour montrer les bornes réelles de la grille utilisée, et les commenter.
+
+
+Diapo 32 — Analyse comparative OLS / Ridge / Lasso
+Le tableau comparatif (MSE, RMSE, R², R² ajusté, Features) est bien structuré. Les boxplots de stabilité en cross-validation 10-fold sont un excellent ajout. Ils montrent visuellement que Ridge et Lasso réduisent la variance des scores par rapport à OLS.
+
+ATTENTION
+Régression polynomiale absente du tableau alors qu'elle était dans les objectifs
+
+
+Comme signalé en diapo 9, la régression polynomiale était annoncée comme quatrième modèle à comparer. Son absence dans ce tableau est une incohérence avec les objectifs définis en diapo 10.
+
+
+Diapo 33 — Recommandation Ridge ou Lasso
+POINT FORT
+Recommandation finale bien argumentée
+
+
+La structure de la diapo (Ridge = Stabilité vs Lasso = Simplicité) avec les critères de choix explicités pour chaque méthode est claire et pédagogique. La recommandation finale (Lasso recommandé, RMSE = 2.341, R² = 0.733, 21 features) est bien justifiée par les métriques.
+
+
+Diapos 34–35 — Conclusion & Synthèse
+La conclusion récapitule honnêtement les choix effectués (EDA, feature engineering, split 80/20, standardisation) et les résultats obtenus. Le rappel final « Standardisez toujours vos données avant Ridge ou Lasso » est une bonne pratique bien soulignée.
+
+Compléments théoriques absents de la présentation
+
+Les cinq points developpes ci-dessous ne sont pas de simples remarques formelles : ils constituent le socle theorique que la presentation aurait du inclure pour etre complete et rigoureuse. Leur absence prive les etudiants des outils necessaires pour comprendre pourquoi Ridge et Lasso se comportent comme ils le font.
+
+1. Lien algébrique exact entre β_OLS et β_Ridge
+La presentation montre la formule de Ridge et annonce que les coefficients sont reduits, sans jamais etablir le lien formel entre la solution OLS et la solution Ridge. Ce lien est pourtant la cle de comprehension du mecanisme.
+
+PRIORITÉ
+Ce qui manque : la dérivation algébrique du shrinkage Ridge
+
+
+Rappel OLS : β_OLS = (XTX)⁻¹ XTy
+
+
+Solution Ridge : β_Ridge = (XTX + αI)⁻¹ XTy. Ridge ajoute α le long de la diagonale de XTX, ce qui la rend toujours inversible meme si XTX est singuliere (cas p ≥ n ou multicolinearite forte).
+
+
+Lien explicite : Dans le cas ou les features sont orthonormees (XTX = I), la solution se simplifie en : β_Ridge_j = β_OLS_j / (1 + α). Chaque coefficient OLS est divise par le meme facteur (1 + α). C'est le shrinkage multiplicatif uniforme — dans ce cas seulement — que la diapositive aurait du presenter.
+
+
+Generalisation : Quand les features sont correlees (XTX ≠ I), la decomposition en valeurs singulieres (SVD) montre que β_Ridge_j = (λj / (λj + α)) × β_OLS_j dans la base des vecteurs singuliers, ou λj sont les valeurs propres de XTX. Le facteur de shrinkage λj/(λj+α) est proche de 1 pour les grandes valeurs propres (directions bien estimees) et proche de 0 pour les petites (directions instables). Ridge attenue donc davantage les directions mal determinees — ce qui est precisement son interet face a la multicolinearite.
+
+
+2. Application numérique — Cas orthogonal (features décorrélées)
+Aucun exemple numerique concret n'illustre le comportement de Ridge dans la presentation. Un exemple simple sur des features orthogonales aurait rendu le mecanisme immediatement tangible.
+
+PRIORITÉ
+Exemple numérique manquant : effet de α sur les coefficients Ridge
+
+
+Hypothese : Features orthonormees, donc XTX = I. Solution OLS : β_OLS = [3.0, 1.5, 0.2, −0.8].
+
+
+Facteur de shrinkage Ridge : β_Ridge_j = β_OLS_j / (1 + α)
+
+
+Pour α = 0 (OLS pur) : β_Ridge = [3.0, 1.5, 0.2, −0.8] — identique a OLS.
+
+
+Pour α = 1 : β_Ridge = [1.50, 0.75, 0.10, −0.40] — tous divises par 2.
+
+
+Pour α = 4 : β_Ridge = [0.60, 0.30, 0.04, −0.16] — tous divises par 5.
+
+
+Pour α = 9 : β_Ridge = [0.30, 0.15, 0.02, −0.08] — tous divises par 10.
+
+
+Lecture : Le coefficient dominant (3.0) reste toujours le plus grand en valeur absolue — G_avg reste dominant mais controle. Le plus petit coefficient (0.2) tend vers zero le plus vite en proportion, mais aucun n'atteint exactement zero. C'est la traduction numerique du shrinkage proportionnel que la diapo 16 formulait incorrectement comme uniforme.
+
+
+3. Cas corrélé et récapitulatif de l'ajustement du modèle
+La presentation ne distingue pas le comportement de Ridge selon que les features sont correlees ou non, alors que c'est precisement dans le cas correle que Ridge apporte le plus de valeur.
+
+PRIORITÉ
+Ce que Ridge fait en cas de multicolinéarité (absent de la présentation)
+
+
+Le probleme OLS en cas de multicolinearite : Si G1 et G2 sont fortement correlees (r ≈ 0.9), XTX est quasi-singuliere. OLS peut produire β_G1 = +15 et β_G2 = −14 : les deux coefficients s'annulent, leur somme approche 1, mais individuellement ils sont enormes et instables — une infime variation des donnees les fait exploser.
+
+
+Ce que Ridge fait : En ajoutant αI, Ridge force les deux coefficients a partager equitablement la variance expliquee. Si β_OLS = [+15, −14] pour (G1, G2), Ridge donnera par exemple β_Ridge ≈ [+0.8, +0.7] pour α bien choisi : deux coefficients modestes, stables, et tous deux positifs — ce qui est coherent avec le fait que G1 et G2 mesurent des choses similaires.
+
+
+Recapitulatif de l'ajustement Ridge : (1) Ridge ajoute αI a XTX → toujours inversible. (2) Le shrinkage est multiplicatif dans la base OLS (cas orthogonal) ou pondere par les valeurs propres (cas general). (3) Les directions de forte variance (grandes valeurs propres) sont peu affectees. (4) Les directions de faible variance (faibles valeurs propres, souvent dues a la multicolinearite) sont fortement regularisees. (5) Aucun coefficient n'est jamais exactement annule.
+
+
+4. Mise à zéro sélective des coefficients dans Lasso
+La présentation annonce que Lasso peut réduire des coefficients a zero, sans jamais expliquer le mécanisme qui produit ce comportement. C'est pourtant la différence fondamentale avec Ridge et le point le plus important pour comprendre la sélection de variables.
+
+PRIORITÉ
+Le mécanisme de soft-thresholding : pourquoi Lasso annule des coefficients
+
+
+Problème d'optimisation Lasso : min_β [ Σ(yi − ŷi)2 + α·Σ|βj| ]
+
+
+Solution analytique dans le cas orthogonal : β_Lasso_j = sign(β_OLS_j) × max(|β_OLS_j| − α/2, 0). C'est le soft-thresholding : on soustrait α/2 de la valeur absolue du coefficient OLS, et on met à zéro si le résultat est négatif.
+
+
+Exemple numérique avec α = 1 : β_OLS = [3.0, 1.5, 0.2, −0.8] → seuil = α/2 = 0.5
+
+
+β_Lasso_1 = sign(3.0) × max(3.0 − 0.5, 0) = +2.50
+
+
+β_Lasso_2 = sign(1.5) × max(1.5 − 0.5, 0) = +1.00
+
+
+β_Lasso_3 = sign(0.2) × max(0.2 − 0.5, 0) = 0.00  ← annule !
+
+
+β_Lasso_4 = sign(−0.8) × max(0.8 − 0.5, 0) = −0.30
+
+
+Interprétations : Tout coefficient OLS dont la valeur absolue est inférieure au seuil α/2 est annulé. C'est le mécanisme de sélection de variables de Lasso. La frontière exacte entre coefficients nuls et non nuls est déterminée par α : plus α est grand, plus le seuil est élevé et plus de coefficients sont annules. Sur le dataset étudiant, avec α = 0.08 optimal, Lasso a annulé 16 des 37 coefficients, ne retenant que 21 features.
+
+
+Pourquoi Ridge ne fait jamais cela : La solution Ridge β_Ridge_j = β_OLS_j/(1+α) ne peut atteindre zéro que si α → +∞, ce qui annulerait TOUS les coefficients simultanément. Il est mathématiquement impossible que Ridge annule un seul coefficient sans annuler tous les autres. La mise a zéro sélective est une propriété exclusive de la pénalité L1.
+
+
+5. Différence fondamentale L1 vs L2 — Géométrie et comportement
+La présentation mentionne la géométrie (boule L2, losange L1) sans jamais construire l'argument qui relie cette géométrie au comportement des solutions. C'est la pièce manquante qui unifie tous les points précédents.
+
+PRIORITÉ
+L'argument géométrique complet qui justifie tout le reste
+
+
+Reformulation du problème : Minimiser la MSE sous contrainte que la norme des coefficients ne dépasse pas un seuil t est équivalent au problème de régularisation. On cherche donc le point de la région de contrainte (boule L2 ou losange L1) qui minimise la MSE.
+
+
+Géométrie L2 — Ridge : La région de contrainte L2 est une boule sphérique, dont la surface est parfaitement lisse et courbe en tout point. Les courbes de niveau elliptiques de la MSE touchent généralement cette boule en un point qui n'est sur aucun axe de coordonnées. Donc aucun coefficient n'est exactement zéro.
+
+
+Géométrie L1 — Lasso : La région de contrainte L1 est un hyper-losange (en 2D : un carre pose sur un coin, en 3D : un octaèdre). Ses coins sont situés exactement sur les axes de coordonnées — c'est-à-dire aux points ou un ou plusieurs coefficients sont exactement zéro. Les courbes de niveau de la MSE touchent statistiquement le losange à un coin, car la surface courbe des ellipses s'accommode parfaitement avec les angles saillants. C'est pourquoi Lasso produit des solutions sparses.
+
+
+Tableau comparatif complet L1 vs L2 : (voir tableau ci-dessous)
+
+
+Critère
+Ridge — L2
+Lasso — L1
+Pénalité
+α·Σβj2  (carres)
+α·Σ|βj|  (valeurs absolues)
+Région de contrainte
+Boule sphérique (lisse)
+Losange / hyper-octaèdre (coins sur les axes)
+Solution analytique (cas orthogonal)
+βj / (1 + α)
+sign(βj) × max(|βj| − α/2, 0)
+Coefficients = 0 ?
+Jamais (sauf α → ∞)
+Oui, des que |βOLS_j| < α/2
+Sélection de variables
+Non
+Oui, automatique
+Multi colinéarité
+Distribue équitablement entre factures corrélées
+Sélectionne arbitrairement l'une d'elles
+Stabilité si factures corrélées
+Très stable
+Instable (choix aléatoire entre corrélées)
+Interopérabilité
+Tous les coefficients actifs
+Modelé spase, plus lisible
+Hyperparamètre
+α ∈ [0 ; +∞[
+α ∈ [0 ; +∞[
+Cas d'usage privilégié
+Features toutes utiles, corrélées
+Beaucoup de factures, peu vraiment utiles
+
+
+Remarque transversale majeure — Portée générale de Ridge et Lasso
+
+Ce point dépasse une simple observation de diapositive : il porte sur une limite conceptuelle de la présentation dans son ensemble.
+
+Tout au long de la présentation, Ridge et Lasso sont implicitement présentés comme des extensions de la régression linéaire (et polynomiale). Cette vision est trop restrictive et risque d'induire en erreur les étudiants sur la portée réelle de ces techniques.
+
+La vérité mathématique est la suivante :
+
+Ridge (L2) et Lasso (L1) sont des termes de pénalité ajoutés à une fonction de perte. Cette fonction de perte peut être :
+MSE (moindres carrés) → régression linéaire ou polynomiale. C'est le cas présenté.
+Log-vraisemblance négative → régression logistique (classification). En scikit-learn : LogisticRegression(penalty='l2', C=1/α) ou penalty='l1'.
+Déviance de Poisson → régression de Poisson pour les données de comptage.
+Déviance de Cox → modèles de survie en médecine ou en actuariat.
+Fonction de perte quelconque → réseaux de neurones (weight decay = L2), SVR, etc.
+
+En pratique, dès que l'on souhaite prévenir l'overfitting ou sélectionner des factures dans n'importe quel modèle paramétrique, Ridge et Lasso sont des outils applicables. Il aurait suffit d'une diapositive ou d'un encadré de synthèse pour mentionner cette généralité, ce qui aurait significativement renforcé la portée pédagogique du travail.
+
+PRIORITÉ
+Recommandation : ajouter une slide de généralisation
+
+
+Suggestion de contenu : Une diapositive intitulée « Ridge & Lasso : au-delà de la régression linéaire » pourrait présenter un tableau à deux colonnes : (1) Type de problème / (2) Fonction de perte régularisée, avec les cas linéaire, logistique et Poisson. Cela constituerait une vraie valeur ajoutée pédagogique.
+
+
+Améliorations prioritaires (par ordre d'urgence)
+
+Harmoniser les métriques. Fixer random_state = 42, relancer le notebook une seule fois et remplacer tous les tableaux contradictoires (diapos 27, 32, 33) par un unique jeu de résultats.
+Corriger les erreurs mathématiques. Supprimer le double intercepte en diapo 6 et corriger l'intitulé « multivariée » en diapo 8.
+Supprimer les doublons. Fusionner les diapos 18 et 19. Supprimer les diapos vides 20 et 22.
+Inclure la régression polynomiale dans le tableau comparatif. Ou reformuler l'objectif de la diapo 10 pour n'annoncer que trois modèles.
+Généraliser Ridge et Lasso. Ajouter une diapositive ou un encadré montrant que ces pénalités s'appliquent à tout problème de régression (logistique, Poisson, etc.).
+Déplacer les exemples chiffrés après le dataset. Mettre la diapo 4 après la diapo 10 pour respecter la progression logique.
+Ajouter une courbe bias-variance. Inclure un graphique MSE train/test vs α ou vs degré polynomial pour illustrer l'overfitting de façon visuelle.
+
+Conclusion
+
+Ce travail témoigne d'un effort de structuration réel et de quelques points bien maîtrisés — chemins de régularisation, cross-validation, mise en garde contre le data leakage, recommandation finale justifiée. Ces éléments positifs existent mais sont insuffisants pour compenser le poids des erreurs identifiées.
+
+Les défauts ne relèvent pas uniquement de la forme ou de la rigueur éditoriale : plusieurs erreurs touchent à la compréhension conceptuelle fondamentale de Ridge et Lasso. La confusion entre multicolinéarité et corrélation feature-cible, la contradiction interne sur l'effet de Ridge sur les coefficients, l'interprétation géométrique parachutée sans construction, la restriction implicite aux seuls modèles linéaires, l'absence du soft-thresholding Lasso et du lien algébrique β_OLS → β_Ridge — ces lacunes indiquent que les mécanismes profonds de la régularisation n'ont pas été pleinement assimilés.
+
+Le point conceptuel le plus significatif à corriger est la restriction implicite de Ridge et Lasso à la régression linéaire. Ces techniques sont des outils généraux de régularisation applicables à tout modèle paramétrique — régression logistique incluse — et c'est cette généralité qui en fait des incontournables du Machine Learning moderne. L'intégrer à la présentation aurait considérablement renforcé sa valeur pédagogique.
+
+La note de 10 / 20 reflète un travail dont la structure est présente mais dont la substance conceptuelle est insuffisante. Avec une refonte sérieuse intégrant le soft-thresholding, le lien algébrique β_OLS → β_Ridge, la généralisation à d'autres modèles, une figure comparative L1/L2, et la correction de toutes les erreurs listées dans ce rapport, ce travail pourrait atteindre 14 à 15 / 20.
+
+
+Questionnaire d'évaluation — Ridge & Lasso
+
+Les questions suivantes sont destinées à évaluer les connaissances des étudiants à l'issue de leur présentation. Elles couvrent les concepts fondamentaux, les pièges classiques et les applications pratiques. Le corrige détaillé suit chaque question.
+
+Question 1 — Fondements de la régularisation
+Enonce : Expliquez pourquoi la régression OLS classique peut produire des coefficients instables lorsque p est proche de n. Quel mécanisme Ridge met-il en place ? Donnez la formule de la solution Ridge et expliquez le rôle du terme alpha.
+
+
+POINT FORT
+Corrige Q1
+
+
+Problème OLS : La solution β = (XTX)-1XTy nécessite que XTX soit inversible. Quand p est proche de n ou que des factures sont corrélées, XTX est quasi-singulière : ses petites valeurs propres tendent vers zéro et leur inverse explose. Les coefficients OLS deviennent énormes et instables.
+
+
+Solution Ridge : β_Ridge = (XTX + αI)-1XTy. En ajoutant α sur la diagonale, toutes les valeurs propres de (XTX + αI) sont au moins égales à α > 0 : la matrice est toujours inversible. Ridge introduit un biais contrôle en échange d'une forte réduction de variance (compromis biais-variance).
+
+
+Cas particulier orthogonal : Si XTX = I, β_Ridge_j = β_OLS_j / (1 + α) : shrinkage multiplicatif uniforme vers zéro.
+
+
+Question 2 — Soft-thresholding et sélection de variables
+Enonce : Features orthonormées. β_OLS = [4.0, 0.6, -0.3, 2.1], α = 1.0. Calculez les coefficients Lasso. Quels coefficients sont annules ? Expliquez le mécanisme de soft-thresholding.
+
+
+POINT FORT
+Corrige Q2
+
+
+Formule : β_Lasso_j = sign(β_OLS_j) × max(|β_OLS_j| - α/2, 0). Seuil = α/2 = 0.5.
+
+
+β1 = sign(4.0) × max(4.0 - 0.5, 0) = +3.5
+
+
+β2 = sign(0.6) × max(0.6 - 0.5, 0) = +0.1
+
+
+β3 = sign(-0.3) × max(0.3 - 0.5, 0) = 0.0  ← annule car |β_OLS| < seuil
+
+
+β4 = sign(2.1) × max(2.1 - 0.5, 0) = +1.6
+
+
+Interprétations : β3 est annulé car |−0.3| < 0.5. Lasso soustrait α/2 de la valeur absolue et met à zéro les coefficients trop faibles. Ridge donne [2.0, 0.3, -0.15, 1.05] pour le même α : aucun nul.
+
+
+Question 3 — Choix entre Ridge et Lasso
+Enonce : Justifiez Ridge ou Lasso pour : (a) 500 gènes / 80 patients, dont 10-20 gènes actifs. (b) Prix immobilier avec 15 factures toutes utiles et corrélées.
+
+
+POINT FORT
+Corrige Q3
+
+
+(a) Genès — Lasso recommande : (1) p >> n (500 >> 80) → OLS non identifiable. (2) Sparsite suspectée : seuls 10-20 gènes actifs sur 500 → Lasso annule les 480-490 autres. (3) Interopérabilité clinique critique. Si plusieurs gènes sont co-exprimes, Elastic Net (L1+L2) est préférable a Lasso seul.
+
+
+(b) Immobilier — Ridge recommande : (1) Toutes les factures sont utiles → pas de sparsite souhaitée. (2) Features corrélées (surface / pièces) → Ridge distribue équitablement la pénalité. (3) Stabilité prédictive prioritaire sur l'interprétabilite.
+
+
+Question 4 — Multicolinéarité vs corrélation feature-cible
+Enonce : Un étudiant dit : G_avg est très corrélée a G3, c'est donc de la multicolinéarite que Ridge va corriger. Identifiez l'erreur et expliquez la distinction.
+
+
+POINT FORT
+Corrige Q4
+
+
+Erreur : La multicolinéarite désigne la corrélation entre variables explicatives (Xi / Xj). Une corrélation entre une feature et la cible Y n'est pas de la multicolinéarite.
+
+
+G_avg / G3 : G_avg predit bien G3 → fort pouvoir prédictif. C'est souhaitable. Ce n'est pas problématique.
+
+
+Vraie multicolinéarite ici : G1 et G2 fortement corrélées entre elles (r ≈ 0.9). OLS peut produire β_G1 = +15, β_G2 = -14. Ridge force ces deux coefficients vers des valeurs modérées et cohérentes.
+
+
+Règle : Xi / Y → pouvoir prédictif (bon). Xi / Xj → multicolinéarite (problématique). Ridge traite le second cas.
+
+
+Question 5 — Argument géométrique L1 vs L2
+Enonce : Expliquez géométriquement pourquoi Lasso produit des solutions sparses et Ridge non. Pourquoi la forme de la région de contrainte est-elle déterminante ?
+
+
+POINT FORT
+Corrige Q5
+
+
+Ridge — Boule L2 : Surface parfaitement lisse. Les courbes de niveau elliptiques de la MSE touchent la boule en un point quelconque, jamais sur un axe de coordonnées → aucun coefficient exactement nul.
+
+
+Lasso — Losange L1 : Hyper-losange dont les coins sont exactement sur les axes (points ou un ou plusieurs βj = 0). Les ellipses MSE touchent préférentiellement ces coins, qui sont des singularités angulaires de la surface → solutions sparses.
+
+
+Conclusion : Ce n'est pas un choix algorithmique mais une nécessite géométrique : la forme angulaire de L1 force les solutions vers les axes; la forme lisse de L2 n'a aucun point privilégié sur les axes.
+
+
+Question 6 — Normalisation et compromis biais-variance
+Enonce : (a) Pourquoi normaliser avant Ridge/Lasso ? (b) Ridge α=0.01 : R2_train=0.95, R2_test=0.61. Ridge α=100 : R2_train=0.74, R2_test=0.72. Quel modelé choisir ?
+
+
+POINT FORT
+Corrige Q6
+
+
+(a) Normalisation : La pénalité compare directement les βj. Un coefficient sur une feature en euros sera numériquement petit même à effet réel identique à un coefficient sur une feature en années. Sans normalisation, la pénalité est biaisée vers les factures à grande échelle. StandardScaler ramené toutes les factures a moyenne 0 et écart-type 1 pour une pénalisation équitable.
+
+
+(b) Choix du α : α=0.01 → gap R2 = 0.34 : fort overfitting. α=100 → gap R2 = 0.02 : excellente généralisation. On choisit α=100. En production c'est la performance sur données non vues qui compte, pas le R2 d'entrainement.
+
+
+Question 7 — Généralisation de Ridge et Lasso
+Enonce : Ridge et Lasso sont-ils spécifiques à la régression linéaire ? Donnez deux exemples concrets avec la fonction de perte associée.
+
+
+POINT FORT
+Corrige Q7
+
+
+Réponse : Non. Ridge (L2) et Lasso (L1) sont des termes de pénalité ajoutables à toute fonction de perte différentiable par rapport aux coefficients.
+
+
+Exemple 1 — Régression logistique : Perte = log-vraisemblance négative. Avec L2 : L = -Σ[yi·log(pi)+(1-yi)·log(1-pi)] + α·Σβj2. En scikit-learn : LogisticRegression(penalty='l2', C=1/α). Avec L1 : penalty='l1'. Mêmes effets : L2 stabilise, L1 sélectionne.
+
+
+Exemple 2 — Réseaux de neurones (weight decay) : La pénalité L2 sur les poids wi : L_total = L_donnees + α·Σwi2. Appelée weight decay. Implémentée via weight_decay dans PyTorch ou kernel_regularizer dans Keras.
+
+
+Cas general : min_β L(β) + pénalité(β). La nature de L détermine le modelé ; la nature de la pénalité (L1 ou L2) détermine sparsité ou stabilité.
+
+
+Question 8 — RidgeCV vs LassoCV : asymétrie algorithmique
+Énoncé : Dans votre code, RidgeCV reçoit une grille de valeurs alphas=alphas_grid, alors que LassoCV ne reçoit que n_alphas=200 sans grille explicite. (a) Expliquez pourquoi ces deux fonctions utilisent des stratégies différentes pour explorer les valeurs de α. (b) Comment LassoCV calcule-t-il l'intervalle sur lequel il place ses 200 valeurs ? Quelle est la signification de alpha_max ?
+
+
+POINT FORT
+Corrigé Q8
+
+
+(a) Pourquoi deux stratégies différentes : RidgeCV exploite la décomposition SVD de X pour calculer toutes les solutions Ridge en un seul calcul matriciel (LOO-CV analytique via Sherman-Morrison). Il ne peut pas deviner a priori la plage utile de α — l'utilisateur doit la fournir. LassoCV exploite le warm-starting : chaque α initialise l'optimisation depuis la solution du α précédent, ce qui est très efficace sur une grille ordonnée. De plus, Lasso possède une propriété que Ridge n'a pas : il existe un alpha_max calculable analytiquement, au-delà duquel tous les coefficients sont exactement nuls. LassoCV peut donc construire automatiquement une grille bien calibrée.
+
+
+(b) Calcul de alpha_max et intervalle : alpha_max = max(|XTy|) / n_samples. C'est le plus petit α qui annule tous les coefficients Lasso. LassoCV construit ensuite sa grille de n_alphas valeurs entre alpha_max (modèle nul) et alpha_max × eps avec eps=1e-3 par défaut (modèle très peu régularisé), espacées logarithmiquement. Sur ce dataset après standardisation, alpha_max est typiquement entre 1 et 10, ce qui donne un intervalle réel d'environ [0.001 ; 5].
+
+
+Conséquence pratique : Pour plus de transparence, on peut afficher les bornes réelles avec lasso_cv.alphas_[[0, -1]] après le fit, ou calculer alpha_max explicitement et passer alphas= directement comme pour Ridge.
+
+
+Question 9 — Critère d'arrêt de LassoCV et rôle de tol
+Énoncé : (a) Quels sont les deux critères d'arrêt de la descente de coordonnées utilisée par Lasso ? Expliquez le rôle de chacun. (b) Que se passe-t-il si max_iter est atteint avant que le critère de convergence tol soit satisfait ? (c) Pourquoi Ridge n'a-t-il pas de problème de convergence ?
+
+
+POINT FORT
+Corrigé Q9
+
+
+(a) Les deux critères d'arrêt : Critère 1 — tol (tolérance) : l'algorithme s'arrête quand la variation maximale des coefficients entre deux itérations est inférieure à tol, c'est-à-dire max(|Δβj|) < tol. C'est le critère de convergence réel, signifiant que les coefficients ont cessé de changer de manière significative. Valeur par défaut scikit-learn : tol=1e-4. Critère 2 — max_iter (limite dure) : arrêt forcé après max_iter itérations, quel que soit l'état de convergence. C'est une sécurité pour éviter une boucle infinie. L'algorithme s'arrête dès que l'UN des deux critères est atteint.
+
+
+(b) Que se passe-t-il si max_iter est atteint avant tol : L'algorithme retourne la solution approximative de l'itération courante, sans avoir convergé. scikit-learn émet un ConvergenceWarning pour signaler ce problème. Les coefficients retournés sont sous-optimaux : le modèle n'a pas atteint le minimum de sa fonction de coût. Toute métrique calculée sur ce modèle (MSE, R², α optimal) est donc biaisée. C'est pourquoi max_iter doit être suffisamment grand (≥ 5000) et tol explicitement fixé.
+
+
+(c) Pourquoi Ridge ne converge pas : Ridge possède une solution analytique exacte : β_Ridge = (XTX + αI)⁻¹XTy. Ce calcul est direct — un produit matriciel et une inversion — sans boucle itérative. Il est mathématiquement garanti de donner le minimum exact de la fonction de coût Ridge en un seul calcul. Il ne peut pas 'ne pas converger' car il n'y a pas d'algorithme itératif.
+
+
+Question 10 — neg_mean_squared_error et choix du critère de sélection de α
+Énoncé : (a) Pourquoi scikit-learn utilise scoring='neg_mean_squared_error' plutôt que scoring='mean_squared_error' ? (b) Sur un dataset où des élèves ont G3 = 0 (abandon scolaire), est-ce que MSE est le meilleur critère pour sélectionner α ? Proposez une alternative justifiée.
+
+
+POINT FORT
+Corrigé Q10
+
+
+(a) Pourquoi neg_MSE : scikit-learn suit une convention unifiée : toutes ses fonctions de scoring cherchent à MAXIMISER. Les métriques d'erreur (MSE, MAE, RMSE) sont naturellement à minimiser. Pour les rendre compatibles avec cette convention, scikit-learn les neg : neg_MSE = −MSE. Maximiser −MSE revient à minimiser MSE. Ce préfixe 'neg_' apparaît systématiquement pour toutes les métriques d'erreur : neg_mean_absolute_error, neg_root_mean_squared_error, etc.
+
+
+(b) MSE optimal sur ce dataset ? Non. MSE pénalise les grandes erreurs de façon quadratique : une erreur de 5 points compte pour 25 dans la MSE. Sur student-mat.csv, des élèves ayant G3 = 0 (abandon, échec grave) peuvent être des outliers extrêmes. MSE va surpondérer ces cas atypiques dans le critère de sélection de α, orientant le choix vers un α sur-régularisé pour minimiser l'impact de ces outliers.
+
+
+Alternative recommandée — neg_mean_absolute_error (MAE) : MAE = (1/n)·Σ|yi − ŷi|. Elle pénalise toutes les erreurs linéairement, sans sur-pondérer les outliers. Un élève avec G3 = 0 prédit à 5 contribue pour |0−5| = 5 dans la MAE, mais pour (0−5)² = 25 dans la MSE. Sur des données éducatives où les cas extrêmes existent (abandons, mentions), MAE donne un α optimal plus représentatif de la performance sur la majorité des élèves. Syntaxe : RidgeCV(scoring='neg_mean_absolute_error').
+
+
+Question 11 — Pipeline de préparation des données : ordre des opérations
+Énoncé : Remettez dans le bon ordre ces opérations de préparation et justifiez chaque position : (A) StandardScaler fit_transform sur X_train, (B) train_test_split, (C) get_dummies sur le dataset complet, (D) Feature engineering (g_avg = (G1+G2)/2), (E) StandardScaler transform sur X_test, (F) Entraînement de LassoCV.
+
+
+POINT FORT
+Corrigé Q11
+
+
+Ordre correct : D → C → B → A → E → F
+
+
+D — Feature engineering en premier : Calculer g_avg = (G1+G2)/2 est une opération arithmétique sur des colonnes existantes. Elle ne dépend d'aucune statistique apprise et ne crée pas de leakage. Elle doit précéder l'encodage car elle peut créer de nouvelles colonnes numériques avant la transformation du schéma.
+
+
+C — get_dummies avant le split : L'encodage one-hot est une transformation structurelle du schéma des colonnes (pas un apprentissage statistique). Fait après le split, il risque de produire des colonnes différentes dans X_train et X_test si une modalité rare n'apparaît que dans l'un des deux. Fait sur le dataset complet, il garantit un schéma identique.
+
+
+B — train_test_split après l'encodage : La séparation définit la frontière entre ce que le modèle peut voir (train) et ce qu'il ne doit pas voir (test). Toutes les opérations non statistiques (D, C) se font avant ; toutes les opérations statistiques (A, E) se font après.
+
+
+A — StandardScaler fit_transform sur X_train seulement : Calcule la moyenne et l'écart-type de chaque feature sur X_train uniquement, puis les applique à X_train. Si fait sur le dataset complet, les statistiques de test contaminent l'entraînement → leakage.
+
+
+E — StandardScaler transform sur X_test : Applique les statistiques apprises sur X_train (pas de fit). X_test est ainsi transformé dans le même référentiel que X_train, sans qu'aucune information de test n'ait été utilisée.
+
+
+F — Entraînement en dernier : LassoCV(cv=10, max_iter=10000, tol=1e-4, n_alphas=200).fit(X_train_scaled, y_train). Jamais sur X_test.
+
+Evaluateur — Avril 2026
