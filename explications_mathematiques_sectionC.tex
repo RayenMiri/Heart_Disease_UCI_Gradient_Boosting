@@ -1,0 +1,135 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\title{Explications Mathématiques des Modèles (Section C)}
+\author{Projet : Classification de maladies cardiaques}
+\date{Avril 2026}
+
+\begin{document}
+\maketitle
+
+\section*{Introduction}
+Ce document présente et explique les principales formules mathématiques utilisées dans la section C (Théorie des modèles) de la soutenance, en cohérence avec le notebook et la structure des slides.
+
+\section{Baseline : Dummy Classifier}
+
+\textbf{Principe :} Le classifieur Dummy prédit toujours la classe majoritaire, c'est-à-dire la valeur la plus fréquente dans les données d'entraînement.
+\begin{align*}
+\hat{y}_i = \text{mode}(y_{train}) \quad \forall i
+\end{align*}
+\textbf{Explication :} Cette formule signifie que pour chaque individu $i$, la prédiction ne dépend pas de ses caractéristiques, mais uniquement de la distribution globale de la cible dans le train. Dans notre projet, cela revient à prédire systématiquement l'absence de maladie (classe 0), car elle est légèrement majoritaire.
+
+\textbf{Utilité dans le projet :} Le Dummy sert de référence minimale : tout modèle sérieux doit faire mieux que cette baseline sur toutes les métriques (Accuracy, Recall, ROC-AUC, etc.). Il permet de vérifier que nos modèles apprennent réellement des relations utiles et ne se contentent pas de reproduire la majorité.
+
+\section{Régression Logistique}
+
+\subsection*{Combinaison linéaire et fonction sigmoïde}
+\begin{align*}
+z &= \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \dots + \beta_p x_p = \boldsymbol{\beta}^T \mathbf{x} \\
+P(y=1|\mathbf{x}) &= \sigma(z) = \frac{1}{1 + e^{-z}}
+\end{align*}
+\textbf{Explication :}
+\begin{itemize}
+  \item $z$ est une combinaison linéaire des variables cliniques (âge, cholestérol, etc.), pondérées par des coefficients $\beta_j$ appris sur les données.
+  \item La fonction sigmoïde $\sigma(z)$ convertit ce score en une probabilité entre 0 et 1, représentant le risque prédit de maladie cardiaque pour un patient donné.
+\end{itemize}
+
+\textbf{Dans le projet :} Cette formule permet d'obtenir une probabilité individuelle pour chaque patient, ce qui est crucial pour le dépistage clinique. La décision finale (malade/sain) dépend ensuite d'un seuil (par défaut 0.5, ou optimisé).
+
+\subsection*{Fonction de coût (log-loss) et régularisation}
+\begin{align*}
+J(\boldsymbol{\beta}) &= -\frac{1}{n} \sum_{i=1}^n \left[ y_i \log(\hat{p}_i) + (1 - y_i) \log(1 - \hat{p}_i) \right] \\
+J_{reg}(\boldsymbol{\beta}) &= J(\boldsymbol{\beta}) + \frac{1}{2C} \sum_{j=1}^p \beta_j^2
+\end{align*}
+\textbf{Explication :}
+\begin{itemize}
+  \item $J(\boldsymbol{\beta})$ est la log-loss, qui mesure l'écart entre les probabilités prédites $\hat{p}_i$ et les vraies étiquettes $y_i$. Plus la log-loss est faible, meilleure est la calibration du modèle.
+  \item $J_{reg}(\boldsymbol{\beta})$ ajoute une pénalité L2 (Ridge) sur la taille des coefficients, contrôlée par $C$. Cela évite que le modèle ne s'adapte trop fortement au bruit du train (surapprentissage).
+\end{itemize}
+
+\textbf{Dans le projet :} La régularisation est essentielle sur un petit dataset comme le nôtre. Elle garantit que la régression logistique reste généralisable et ne mémorise pas les cas particuliers du train. Le choix $C=1.0$ est un compromis validé empiriquement.
+
+\section{Naive Bayes}
+
+\subsection*{Théorème de Bayes et hypothèse d'indépendance}
+\begin{align*}
+P(y=c|\mathbf{x}) &= \frac{P(\mathbf{x}|y=c) \cdot P(y=c)}{P(\mathbf{x})} \\
+P(\mathbf{x}|y=c) &= \prod_{j=1}^p P(x_j|y=c)
+\end{align*}
+\textbf{Explication :}
+\begin{itemize}
+  \item La première formule applique le théorème de Bayes pour calculer la probabilité qu'un patient appartienne à la classe $c$ (malade ou sain), connaissant ses variables cliniques.
+  \item L'hypothèse naïve suppose que les variables sont indépendantes conditionnellement à la classe, ce qui simplifie le calcul en un produit de probabilités individuelles.
+\end{itemize}
+
+\textbf{Dans le projet :} Cette hypothèse est simplificatrice mais fonctionne bien en pratique. Elle permet d'obtenir un modèle très rapide et robuste, adapté au dépistage où la rapidité et la simplicité sont des atouts.
+
+\textbf{Décision :} $\hat{y} = \arg\max_c P(y=c) \prod_{j=1}^p P(x_j|y=c)$ : on attribue à chaque patient la classe ayant la probabilité la plus élevée.
+
+
+\subsection*{Modèle gaussien pour les variables continues}
+\begin{align*}
+P(x_j|y=c) = \frac{1}{\sqrt{2\pi\sigma_{jc}^2}} \exp\left(-\frac{(x_j - \mu_{jc})^2}{2\sigma_{jc}^2}\right)
+\end{align*}
+\textbf{Explication :}
+\begin{itemize}
+  \item Pour chaque variable continue (ex : âge, cholestérol), on suppose que sa distribution, pour chaque classe, suit une loi normale de moyenne $\mu_{jc}$ et de variance $\sigma_{jc}^2$.
+  \item Ces paramètres sont estimés à partir des patients du train appartenant à chaque classe.
+\end{itemize}
+
+\textbf{Dans le projet :} Ce choix est adapté car la plupart de nos variables sont continues. Cela permet au modèle de s'ajuster à la distribution réelle des données cliniques, tout en restant simple et interprétable.
+
+\section{Gradient Boosting}
+r_{im} &= -\frac{\partial L(y_i, F_{m-1}(\mathbf{x}_i))}{\partial F_{m-1}(\mathbf{x}_i)} \\
+F_m(\mathbf{x}) &= F_{m-1}(\mathbf{x}) + \eta \cdot h_m(\mathbf{x})
+
+\subsection*{Principe itératif}
+\begin{align*}
+F_0(\mathbf{x}) &= \arg\min_\gamma \sum_{i=1}^n L(y_i, \gamma) \\
+r_{im} &= -\frac{\partial L(y_i, F_{m-1}(\mathbf{x}_i))}{\partial F_{m-1}(\mathbf{x}_i)} \\
+F_m(\mathbf{x}) &= F_{m-1}(\mathbf{x}) + \eta \cdot h_m(\mathbf{x})
+\end{align*}
+\textbf{Explication :}
+\begin{itemize}
+  \item $F_0$ est la prédiction initiale (constante) qui minimise la perte sur tout le train.
+  \item À chaque itération $m$, on calcule les pseudo-résidus (erreurs actuelles), puis on ajuste un nouvel arbre $h_m$ pour corriger ces erreurs.
+  \item $\eta$ (learning rate) contrôle l'impact de chaque nouvel arbre.
+\end{itemize}
+
+\textbf{Dans le projet :} Cette approche permet de construire un modèle très puissant, capable de capturer des relations non linéaires complexes entre les variables cliniques et la maladie. Chaque $h_m$ est un arbre de décision binaire, ce qui explique la capacité du modèle à gérer des interactions et des effets de seuil.
+
+p &= \sigma(F(\mathbf{x})) = \frac{1}{1 + e^{-F(\mathbf{x})}}
+
+\subsection*{Fonction de perte pour la classification binaire}
+\begin{align*}
+L(y, F(\mathbf{x})) &= -\left[ y \log(p) + (1-y) \log(1-p) \right] \\
+p &= \sigma(F(\mathbf{x})) = \frac{1}{1 + e^{-F(\mathbf{x})}}
+\end{align*}
+\textbf{Explication :}
+\begin{itemize}
+  \item La perte utilisée est la log-loss (déviance), identique à celle de la régression logistique, adaptée à la classification binaire.
+  \item $p$ est la probabilité prédite après passage par la fonction sigmoïde.
+  \item Les pseudo-résidus $r_i = y_i - p_i$ représentent l'erreur à corriger à chaque étape.
+\end{itemize}
+
+\textbf{Dans le projet :} Cette fonction de perte permet d'optimiser la capacité du modèle à bien classer les patients, tout en fournissant des probabilités calibrées. Elle est adaptée à notre objectif de dépistage.
+
+
+\subsection*{Régularisation}
+\begin{itemize}
+  \item $\eta$ : learning rate (taux d'apprentissage) -- plus il est faible, plus l'apprentissage est progressif et robuste.
+  \item $M$ : nombre d'arbres -- plus il est élevé, plus le modèle est complexe.
+  \item $\text{max\_depth}$ : profondeur maximale des arbres -- limite la complexité de chaque arbre (ici, arbres binaires peu profonds).
+  \item $\text{min\_samples\_leaf}$ : minimum d'exemples par feuille -- évite la surspécialisation.
+  \item $\text{subsample}$ : fraction d'échantillons utilisés par arbre -- introduit de la stochasticité, réduit la variance.
+\end{itemize}
+\textbf{Remarque :} Dans notre projet, ces hyperparamètres sont choisis pour limiter le surapprentissage, qui est un risque majeur avec Gradient Boosting sur un petit dataset. Les arbres sont bien des arbres de décision binaires, ce qui permet de modéliser des interactions complexes tout en gardant une structure contrôlée.
+
+\section*{Conclusion}
+Chaque formule est reliée à un aspect clé du modèle correspondant, en cohérence avec la présentation orale et le notebook.
+
+\end{document}

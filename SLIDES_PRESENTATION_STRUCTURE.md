@@ -1,6 +1,6 @@
-# Structure de Presentation (Version 53 Slides avec Formules Mathematiques)
+# Structure de Presentation (Version 61 Slides avec Formules Mathematiques)
 
-Objectif: soutenance longue (53 slides), rigoureuse, avec expressions mathematiques pour chaque modele et chaque metrique, en restant strictement coherent avec [main.ipynb](main.ipynb).
+Objectif: soutenance longue (61 slides), rigoureuse, avec expressions mathematiques pour chaque modele et chaque metrique, en restant strictement coherent avec [main.ipynb](main.ipynb).
 
 > Les formules sont en notation LaTeX. Utiliser un editeur compatible (Beamer, PowerPoint Equation Editor, Google Slides + MathType, reveal.js, etc.)
 
@@ -31,12 +31,13 @@ Critere: C5
 Contenu:
 - A. Introduction et cadre
 - B. Donnees et preparation
-- C. Theorie des modeles (avec formules)
-- D. Protocole experimental et metriques
-- E. Resultats validation croisee
-- F. Resultats sur le jeu de test
-- G. Analyse critique avancee
-- H. Conclusion et perspectives
+- C. Theorie des modeles implementes (avec formules)
+- D. Fondations arbres, boosting et XGBoost (obligatoire)
+- E. Protocole experimental et metriques
+- F. Resultats validation croisee
+- G. Resultats sur le jeu de test
+- H. Analyse critique avancee
+- I. Conclusion et perspectives
 Critere: C5
 
 ### Slide 3 - Contexte medical
@@ -147,7 +148,7 @@ Critere: C2, C3
 
 ---
 
-## Bloc C - Theorie des modeles (Slides 14 a 25)
+## Bloc C - Theorie des modeles implementes (Slides 14 a 25)
 
 ### Slide 14 - Baseline: Dummy Classifier
 Contenu:
@@ -274,9 +275,102 @@ Critere: C1
 
 ---
 
-## Bloc D - Protocole experimental et metriques (Slides 26 a 32)
+## Bloc D - Fondations arbres, boosting et XGBoost (Slides 26 a 33)
 
-### Slide 26 - Metriques: matrice de confusion
+### Slide 26 - Arbre de decision binaire unique: ID3 vs C4.5 vs CART
+Contenu:
+- Objectif: poser la **fondation** des methodes a arbres avant le boosting.
+- ID3 (entropie + information gain):
+  $$H(Y)=-\sum_k p_k\log_2(p_k), \quad IG(Y,X)=H(Y)-\sum_{v\in Values(X)}\frac{|D_v|}{|D|}H(Y|X=v)$$
+- C4.5: corrige le biais des attributs multi-valeurs avec le gain ratio:
+  $$GR(Y,X)=\frac{IG(Y,X)}{SplitInfo(X)}, \quad SplitInfo(X)=-\sum_v\frac{|D_v|}{|D|}\log_2\frac{|D_v|}{|D|}$$
+- CART (base de scikit-learn): split **binaire** + indice de Gini:
+  $$Gini(t)=1-\sum_k p(k|t)^2$$
+- Lien projet: le notebook n'entraine pas un `DecisionTreeClassifier` isole; cette comparaison est le socle theorique pour comprendre les arbres faibles du Gradient Boosting.
+Critere: C1, C3
+
+### Slide 27 - Equation de split d'un arbre et interpretation clinique
+Contenu:
+- Pour un noeud $t$ et un split $s$, la reduction d'impurete est:
+  $$\Delta I(s,t)=I(t)-\frac{N_L}{N_t}I(t_L)-\frac{N_R}{N_t}I(t_R)$$
+- Le meilleur split maximise $\Delta I(s,t)$.
+- Dans une feuille, probabilité positive:
+  $$\hat{p}_{leaf}=\frac{n_{pos}}{n_{pos}+n_{neg}}, \quad \hat{y}=\mathbb{1}(\hat{p}_{leaf}\ge t)$$
+- Lien projet: les variables `thal`, `cp`, `ca` dominantes dans nos resultats jouent typiquement ce role de variables de split discriminantes.
+Critere: C1, C6
+
+### Slide 28 - Principe du Boosting sequentiel (detaille)
+Contenu:
+- Modele additif par etapes:
+  $$F_M(\mathbf{x})=F_0(\mathbf{x})+\sum_{m=1}^M \eta\,h_m(\mathbf{x})$$
+- Chaque nouvel arbre est ajuste **apres** les precedents pour corriger les erreurs residuelles.
+- Contrairement au bagging, les apprenants ne sont pas independants: il y a une dependance temporelle forte entre les arbres.
+- Lien projet: `n_estimators=200` et `learning_rate=0.05` = apprentissage progressif, mais risque de memorisation sur petit jeu.
+Critere: C1, C3
+
+### Slide 29 - Descente de gradient sur arbres + shrinkage
+Contenu:
+- Optimisation en espace fonctionnel:
+  $$\hat{F}=\arg\min_F \sum_{i=1}^n L(y_i,F(\mathbf{x}_i))$$
+- Direction de descente a l'etape $m$:
+  $$r_{im}=-\left[\frac{\partial L(y_i,F(\mathbf{x}_i))}{\partial F(\mathbf{x}_i)}\right]_{F=F_{m-1}}$$
+- Mise a jour avec pas (shrinkage):
+  $$F_m(\mathbf{x})=F_{m-1}(\mathbf{x})+\eta\,\rho_m\,h_m(\mathbf{x}), \quad \rho_m=\arg\min_\rho \sum_i L(y_i,F_{m-1}(\mathbf{x}_i)+\rho h_m(\mathbf{x}_i))$$
+- Lien projet: le shrinkage ($\eta=0.05$) regularise chaque etape, mais impose plus d'arbres pour atteindre une bonne performance.
+Critere: C1, C3
+
+### Slide 30 - Difference obligatoire: Gradient Boosting vs Random Forest
+Contenu:
+- Random Forest (bagging parallele):
+  $$\hat{p}_{RF}(\mathbf{x})=\frac{1}{B}\sum_{b=1}^B h_b(\mathbf{x})$$
+- Gradient Boosting (additif sequentiel):
+  $$\hat{p}_{GB}(\mathbf{x})=\sigma\left(F_0(\mathbf{x})+\sum_{m=1}^M \eta h_m(\mathbf{x})\right)$$
+- Comparaison detaillee:
+  - RF: reduction de variance, robuste au bruit, parallelisable.
+  - GB: reduction de biais + variance via corrections successives, plus sensible aux hyperparametres.
+- Lien projet: le surapprentissage detecte pour GB (AUC train 1.000, gap CV eleve) est coherent avec cette dynamique sequentielle.
+- Statut notebook: Random Forest est cite en perspective, non entraine dans la comparaison principale.
+Critere: C1, C3, C6
+
+### Slide 31 - XGBoost: extension regularisee du boosting
+Contenu:
+- Fonction objectif regularisee:
+  $$Obj^{(t)}=\sum_i l(y_i,\hat{y}_i^{(t-1)}+f_t(\mathbf{x}_i))+\Omega(f_t), \quad \Omega(f)=\gamma T+\frac{\lambda}{2}\sum_j w_j^2$$
+- Approximation de second ordre:
+  $$\tilde{Obj}^{(t)}\approx\sum_i\left[g_i f_t(\mathbf{x}_i)+\frac{1}{2}h_i f_t(\mathbf{x}_i)^2\right]+\Omega(f_t)$$
+- Atouts: regularisation explicite, gestion des valeurs manquantes, optimisation rapide.
+- Lien projet: permettrait de tester si la regularisation structurelle de XGBoost reduit le gap observe sur notre GB sklearn.
+- Statut notebook: **XGBoost non implemente ici** (mention explicite deja presente dans les perspectives du notebook).
+Critere: C1, C4, C6
+
+### Slide 32 - Hypotheses d'application et risques pratiques
+Contenu:
+- Sensibilite aux valeurs aberrantes: des residus tres grands peuvent orienter excessivement les premiers arbres.
+- Risque de surapprentissage si `n_estimators` est trop eleve (surtout sur petit dataset).
+- Interdependance critique:
+  $$\text{complexite effective} \propto \eta \times M$$
+  avec $\eta=learning\_rate$, $M=n\_estimators$.
+- Regularisation utile: `max_depth`, `min_samples_leaf`, `subsample`, et eventuelle validation precoce.
+- Lien projet: malgre regularisation (`max_depth=3`, `min_samples_leaf=5`, `subsample=0.9`), le gap CV confirme un surapprentissage.
+Critere: C3, C6
+
+### Slide 33 - Metriques de convergence: `train_score_` et `staged_predict()`
+Contenu:
+- Courbe de deviance train par etape (scikit-learn):
+  $$train\_score[m]=\frac{1}{n}\sum_{i=1}^n L\left(y_i,F_m(\mathbf{x}_i)\right)$$
+- Evaluation pas-a-pas via predictions stagees:
+  $$\hat{p}_m(\mathbf{x})=staged\_predict\_proba_m(\mathbf{x}), \quad AUC_m=AUC(y,\hat{p}_m)$$
+  $$Recall_m(t)=\frac{TP_m(t)}{TP_m(t)+FN_m(t)}$$
+- Interet: visualiser la convergence, detecter le point ou la validation se degrade, choisir $M^*$.
+- Lien projet: ces outils prolongent nos diagnostics actuels (CV gap + learning curves).
+- Statut notebook: `train_score_` / `staged_predict()` ne sont pas exploites explicitement dans la version actuelle; a ajouter comme extension methodologique.
+Critere: C3, C6
+
+---
+
+## Bloc E - Protocole experimental et metriques (Slides 34 a 40)
+
+### Slide 34 - Metriques: matrice de confusion
 Contenu:
 - Base de toutes les metriques de classification:
 
@@ -289,7 +383,7 @@ Contenu:
 - Chaque metrique est une combinaison de ces 4 valeurs.
 Critere: C1
 
-### Slide 27 - Metriques: Accuracy, Precision, Recall
+### Slide 35 - Metriques: Accuracy, Precision, Recall
 Contenu:
 - **Accuracy** (exactitude):
   $$\text{Accuracy} = \frac{VP + VN}{VP + VN + FP + FN}$$
@@ -304,7 +398,7 @@ Contenu:
   Parmi les vrais positifs, combien sont detectes. **Metrique prioritaire en depistage.**
 Critere: C1, C6
 
-### Slide 28 - Metriques: F1-score et Specificite
+### Slide 36 - Metriques: F1-score et Specificite
 Contenu:
 - **F1-score** (moyenne harmonique de Precision et Recall):
   $$F_1 = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}$$
@@ -319,7 +413,7 @@ Contenu:
   - FP = patient sain oriente vers examens → cout modere.
 Critere: C1, C6
 
-### Slide 29 - ROC-AUC: definition mathematique
+### Slide 37 - ROC-AUC: definition mathematique
 Contenu:
 - La courbe ROC trace le **TPR** (Recall) vs le **FPR** ($1 - \text{Specificite}$) pour chaque seuil $t \in [0, 1]$:
   $$TPR(t) = P(\hat{p} \geq t | y = 1), \quad FPR(t) = P(\hat{p} \geq t | y = 0)$$
@@ -331,7 +425,7 @@ Contenu:
 - **Avantage**: independant du seuil de decision.
 Critere: C1
 
-### Slide 30 - Validation croisee stratifiee
+### Slide 38 - Validation croisee stratifiee
 Contenu:
 - **StratifiedKFold** ($K=5$, `shuffle=True`):
   - Le train est divise en $K$ folds de taille egale, en preservant les proportions de classes.
@@ -342,7 +436,7 @@ Contenu:
 - **Pourquoi stratifie?** Sur un petit dataset (237 train), un fold non stratifie pourrait avoir une proportion de classes tres differente → estimations instables.
 Critere: C2, C3
 
-### Slide 31 - CV gap: diagnostic de surapprentissage
+### Slide 39 - CV gap: diagnostic de surapprentissage
 Contenu:
 - Definition du CV gap:
   $$\text{CV\_gap} = \bar{S}_{train} - \bar{S}_{test}$$
@@ -354,7 +448,7 @@ Contenu:
 - Nos resultats: NB=0.031, LogReg=0.047, **GB=0.138**.
 Critere: C3
 
-### Slide 32 - Brier score: calibration des probabilites
+### Slide 40 - Brier score: calibration des probabilites
 Contenu:
 - Mesure la qualite des probabilites predites:
   $$\text{Brier} = \frac{1}{n} \sum_{i=1}^n (\hat{p}_i - y_i)^2$$
@@ -365,9 +459,9 @@ Critere: C1, C6
 
 ---
 
-## Bloc E - Resultats validation croisee (Slides 33 a 37)
+## Bloc F - Resultats validation croisee (Slides 41 a 45)
 
-### Slide 33 - Tableau CV complet
+### Slide 41 - Tableau CV complet
 Contenu:
 - Tableau CV trie par ROC-AUC (valeurs du notebook):
 
@@ -381,7 +475,7 @@ Contenu:
 - Tous les modeles surpassent la baseline.
 Critere: C3
 
-### Slide 34 - CV: Naive Bayes
+### Slide 42 - CV: Naive Bayes
 Contenu:
 - CV ROC-AUC: 0.870 (meilleur).
 - CV gap: 0.031 (le plus faible) → **meilleur compromis biais-variance**.
@@ -389,7 +483,7 @@ Contenu:
 - L'hypothese d'independance, bien que violee, ne degrade pas les performances en pratique.
 Critere: C3
 
-### Slide 35 - CV: Regression Logistique
+### Slide 43 - CV: Regression Logistique
 Contenu:
 - CV ROC-AUC: 0.869 (tres proche de NB).
 - CV gap: 0.047 → compromis correct, surveillance recommandee.
@@ -397,7 +491,7 @@ Contenu:
 - La regularisation L2 ($C=1.0$) contient le surapprentissage.
 Critere: C3
 
-### Slide 36 - CV: Gradient Boosting et surapprentissage
+### Slide 44 - CV: Gradient Boosting et surapprentissage
 Contenu:
 - CV ROC-AUC: 0.862 (le plus bas des 3 modeles non-dummy).
 - **CV gap: 0.138** ← signal fort de surapprentissage.
@@ -406,7 +500,7 @@ Contenu:
 - **Cause probable**: combinaison petit dataset (237 exemples) + modele puissant.
 Critere: C3, C6
 
-### Slide 37 - Synthese CV
+### Slide 45 - Synthese CV
 Contenu:
 - Classement par robustesse (CV gap): NB > LogReg >> GB.
 - Classement par discrimination (ROC-AUC): NB ≈ LogReg > GB.
@@ -416,9 +510,9 @@ Critere: C3
 
 ---
 
-## Bloc F - Resultats sur le jeu de test (Slides 38 a 44)
+## Bloc G - Resultats sur le jeu de test (Slides 46 a 52)
 
-### Slide 38 - Tableau test complet
+### Slide 46 - Tableau test complet
 Contenu:
 - Resultats test (valeurs du notebook):
 
@@ -431,14 +525,14 @@ Contenu:
 
 Critere: C3
 
-### Slide 39 - Matrices de confusion
+### Slide 47 - Matrices de confusion
 Contenu:
 - Figure: 4 matrices de confusion (du notebook).
 - Comparaison visuelle des profils d'erreurs.
 - Baseline: 32 VN, 0 VP, 28 FN, 0 FP → cliniquement inutile.
 Critere: C3
 
-### Slide 40 - Analyse des erreurs FN vs FP
+### Slide 48 - Analyse des erreurs FN vs FP
 Contenu:
 - Comparaison des faux negatifs (les plus critiques en depistage):
   - **Naive Bayes**: 4 FN sur 28 positifs = 14.3% de patients malades manques.
@@ -448,7 +542,7 @@ Contenu:
 - En depistage, chaque FN est un patient malade **non detecte** → Naive Bayes minimise ce risque.
 Critere: C3, C6
 
-### Slide 41 - Courbes ROC
+### Slide 49 - Courbes ROC
 Contenu:
 - Figure: courbes ROC superposees (du notebook).
 - LogReg (0.950) > NB (0.938) > GB (0.905) >> Baseline (0.500).
@@ -456,7 +550,7 @@ Contenu:
 - Plus la courbe est proche du coin superieur gauche, meilleure est la discrimination.
 Critere: C3
 
-### Slide 42 - Rapports de classification
+### Slide 50 - Rapports de classification
 Contenu:
 - Extrait des rapports (du notebook):
   - NB classe 1: Precision 0.889, Recall **0.857**, F1 0.873.
@@ -465,7 +559,7 @@ Contenu:
 - Le Recall de la classe 1 (positifs) est la metrique la plus critique pour le depistage.
 Critere: C3
 
-### Slide 43 - Importance des variables
+### Slide 51 - Importance des variables
 Contenu:
 - Tableau (du notebook):
 
@@ -481,7 +575,7 @@ Contenu:
 - `age` importante pour GB mais pas pour LogReg → interaction non lineaire captee par les arbres.
 Critere: C3, C6
 
-### Slide 44 - Coherence CV-Test
+### Slide 52 - Coherence CV-Test
 Contenu:
 - Les Deltas positifs (0.043 a 0.080) indiquent des performances test legerement superieures aux estimations CV.
 - Cause probable: variabilite du petit echantillon test (60 obs.).
@@ -491,9 +585,9 @@ Critere: C3
 
 ---
 
-## Bloc G - Analyse critique avancee (Slides 45 a 50)
+## Bloc H - Analyse critique avancee (Slides 53 a 58)
 
-### Slide 45 - Calibration: courbes et Brier score
+### Slide 53 - Calibration: courbes et Brier score
 Contenu:
 - Figure: courbes de calibration (du notebook).
 - **Brier scores** (du notebook):
@@ -504,7 +598,7 @@ Contenu:
 - En clinique, un modele bien calibre permet de dire: "Ce patient a 70% de risque" avec confiance.
 Critere: C3, C6
 
-### Slide 46 - Optimisation exploratoire du seuil
+### Slide 54 - Optimisation exploratoire du seuil
 Contenu:
 - Par defaut, le seuil de decision est $t = 0.5$: si $\hat{p} \geq 0.5$ → prediction positive.
 - L'optimisation du seuil via la courbe Precision-Recall permet de trouver un $t$ qui maximise le Recall tout en controlant la Precision.
@@ -513,7 +607,7 @@ Contenu:
 - Pour une estimation non biaisee: fixer le seuil sur un jeu de validation separe puis evaluer sur un test externe.
 Critere: C3, C6
 
-### Slide 47 - Learning curves
+### Slide 55 - Learning curves
 Contenu:
 - Figures: learning curves Train/Validation ROC-AUC vs taille d'entrainement (du notebook).
 - **Gradient Boosting**: gap train/validation **persiste** meme avec plus de donnees → surapprentissage structurel.
@@ -521,7 +615,7 @@ Contenu:
 - Formellement: si $S_{train}(n) - S_{val}(n) \to 0$ quand $n \to \infty$, le modele n'est pas en surapprentissage.
 Critere: C3, C6
 
-### Slide 48 - Synthese biais-variance: 3 preuves convergentes
+### Slide 56 - Synthese biais-variance: 3 preuves convergentes
 Contenu:
 - **Preuve 1 (CV gap, Section 4)**: GB=0.138 >> NB=0.031.
 - **Preuve 2 (Learning curves, Section 6)**: GB gap persiste, NB/LogReg convergent.
@@ -530,7 +624,7 @@ Contenu:
 - Naive Bayes et Regression Logistique ont un profil plus adapte a ce petit dataset.
 Critere: C3, C6
 
-### Slide 49 - Limites de l'etude
+### Slide 57 - Limites de l'etude
 Contenu:
 - **Taille du dataset**: 297 observations, 60 en test → estimations sujettes a variabilite.
 - **Pas de validation externe**: tous les resultats proviennent d'un seul dataset (Cleveland). Generalisation non garantie.
@@ -540,7 +634,7 @@ Contenu:
 - **Absence de tests statistiques formels**: la difference entre modeles n'est pas testee (McNemar non implemente).
 Critere: C6
 
-### Slide 50 - Validite et reproductibilite
+### Slide 58 - Validite et reproductibilite
 Contenu:
 - **Reproductibilite**: `random_state=42` partout → resultats identiques a chaque execution.
 - **Pipeline integre**: StandardScaler dans sklearn.Pipeline → pas de data leakage.
@@ -551,9 +645,9 @@ Critere: C2, C3
 
 ---
 
-## Bloc H - Conclusion et perspectives (Slides 51 a 53)
+## Bloc I - Conclusion et perspectives (Slides 59 a 61)
 
-### Slide 51 - Recommandation operationnelle
+### Slide 59 - Recommandation operationnelle
 Contenu:
 - **Scenario depistage** (priorite: minimiser les faux negatifs):
   - → **Naive Bayes**: Recall=0.857 (meilleur), F1=0.873, gap=0.031, Brier=0.098.
@@ -568,7 +662,7 @@ Contenu:
   - Pourrait beneficier d'un tuning d'hyperparametres (non implemente).
 Critere: C5, C6
 
-### Slide 52 - Perspectives non implementees
+### Slide 60 - Perspectives non implementees
 Contenu:
 - **Tuning global** (GridSearchCV/RandomizedSearchCV): pourrait ameliorer GB.
 - **Validation externe** sur d'autres cohortes UCI (Hungarian, Swiss, VA).
@@ -580,20 +674,21 @@ Contenu:
 - Tous ces elements sont **non implementes dans ce notebook**.
 Critere: C4, C6
 
-### Slide 53 - Questions & Reponses
+### Slide 61 - Questions & Reponses
 Contenu:
 - Resume en une phrase: "Naive Bayes pour depister, Regression Logistique pour decider, Gradient Boosting a eviter sans tuning."
+- Rappel de cadrage: arbre binaire (ID3/C4.5/CART) presente comme fondation, XGBoost presente comme extension theorique non implementee.
 - Ouverture aux questions du jury.
 - Slides de backup disponibles (definitions, justifications, methodologie, analyse critique).
 Critere: C5
 
 ---
 
-## Slides de Backup (hors 53)
+## Slides de Backup (hors 61)
 
 ### Backup 1 - Definitions N1
-- Rappels rapides des 3 modeles: principes, forces, faiblesses.
-- Formules cles: sigmoide, Bayes, mise a jour GB.
+- Rappels rapides: arbre binaire (ID3/C4.5/CART), GB, RF (comparatif), XGBoost, NB, LogReg.
+- Formules cles: impurete de split, sigmoide, Bayes, mise a jour GB, objectif regularise XGBoost.
 
 ### Backup 2 - Justification N2
 - Avantages/inconvenients par modele.
@@ -621,3 +716,6 @@ Critere: C5
 8. Les limites sont explicites et honnetes.
 9. Chaque formule mathematique est expliquee en mots et reliee au contexte clinique.
 10. Les 3 preuves de surapprentissage de GB sont presentees de maniere convergente.
+11. La difference GB vs Random Forest est expliquee explicitement (strategie, objectif, risques).
+12. `train_score_` et `staged_predict()` sont presentes comme diagnostics de convergence (et statut implemente/non implemente).
+13. Le statut XGBoost est explicite: extension theorique presentee, non implementee dans `main.ipynb`.
